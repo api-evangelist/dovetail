@@ -1,0 +1,37 @@
+generated: '2026-07-18'
+method: searched
+source: https://developers.dovetail.com/docs/authorization
+docs: https://developers.dovetail.com/docs/authorization
+summary:
+  types: [apiKey]
+  api_key_in: [header]
+  transport: bearer
+  oauth2_flows: []
+  note: >-
+    Dovetail's Public API authenticates with personal API tokens presented as HTTP Bearer
+    credentials. OAuth 2.0 for third-party apps is documented as "coming soon" and not yet
+    generally available. The hosted MCP server additionally supports OAuth 2.1 browser sign-in.
+schemes:
+  - name: apiToken
+    type: apiKey
+    in: header
+    parameter: Authorization
+    scheme: bearer
+    token_prefix: "api."
+    token_ttl_days: 30
+    generation: https://dovetail.com/settings/user/account
+    detail: >-
+      Personal API token, opaque string prefixed "api." (e.g. api.wcF...). Presented as
+      `Authorization: Bearer <DOVETAIL_API_TOKEN>`. Tokens expire 30 days after generation
+      and can be manually revoked; the UI displays the key only once at creation. A token
+      grants the data and permissions of the user who created it.
+    sources: [https://developers.dovetail.com/docs/authorization]
+  - name: mcpOAuth
+    type: oauth2
+    status: available-for-mcp-only
+    scheme: oauth2.1
+    detail: >-
+      OAuth 2.1 browser-based sign-in is supported for the hosted MCP server
+      (https://dovetail.com/api/mcp) as an alternative to Bearer API tokens. Public-API
+      OAuth 2.0 for third-party applications is documented as coming soon.
+    sources: [https://developers.dovetail.com/docs/mcp, https://developers.dovetail.com/docs/oauth-2]
