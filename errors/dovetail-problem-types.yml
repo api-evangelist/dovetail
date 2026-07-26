@@ -1,0 +1,45 @@
+generated: '2026-07-18'
+method: derived
+source: >-
+  Derived from the HTTP semantics documented across developers.dovetail.com (authorization,
+  rate-limits, permissions notes on list/create endpoints). Dovetail does not publish a dedicated
+  error-code reference or an application/problem+json (RFC 9457) contract; this captures the
+  documented status-code behavior only. No error codes were invented.
+format: http-status
+docs: https://developers.dovetail.com/docs/rate-limits
+envelope:
+  media_type: application/json
+  note: JSON error body; no RFC 9457 problem+json schema is published.
+problems:
+  - status: 400
+    title: Bad Request
+    remediation: Malformed request body or invalid parameters — validate payload and query params.
+  - status: 401
+    title: Unauthorized
+    remediation: >-
+      Missing/invalid or expired API token. Tokens expire 30 days after generation; regenerate at
+      dovetail.com/settings/user/account and send as Authorization: Bearer.
+    source: https://developers.dovetail.com/docs/authorization
+  - status: 403
+    title: Forbidden
+    remediation: >-
+      The token's user lacks permission for the resource. Endpoints document per-operation
+      permission requirements.
+  - status: 404
+    title: Not Found
+    remediation: Resource id (22-char Base62 UUID) does not exist or is not visible to the user.
+  - status: 409
+    title: Conflict
+    remediation: >-
+      Returned by file-upload complete flows on state conflicts (for example a part etag mismatch);
+      the client may retry.
+    source: https://developers.dovetail.com/reference/post_v2-files-file-id-upload-complete
+  - status: 429
+    title: Too Many Requests
+    remediation: >-
+      Rate limit exceeded (200 req/min per workspace). Wait for Retry-After seconds or until
+      X-RateLimit-Reset before retrying.
+    source: https://developers.dovetail.com/docs/rate-limits
+  - status: 500
+    title: Internal Server Error
+    remediation: Transient server error — retry with exponential backoff; contact support if persistent.

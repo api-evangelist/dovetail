@@ -1,0 +1,89 @@
+generated: '2026-07-18'
+method: searched
+source: https://developers.dovetail.com/
+docs:
+  authorization: https://developers.dovetail.com/docs/authorization
+  rate_limits: https://developers.dovetail.com/docs/rate-limits
+  pagination: https://developers.dovetail.com/docs/pagination
+  filters: https://developers.dovetail.com/docs/filters
+  sort: https://developers.dovetail.com/docs/sort
+  content_formats: https://developers.dovetail.com/docs/content-formats
+description: >-
+  Cross-cutting request/response conventions for the Dovetail Public API, captured from the
+  developer docs. Cross-links authentication/, rate-limits/, errors/ and lifecycle/.
+conventions:
+  base_url: https://dovetail.com/api/v1/
+  authentication:
+    style: bearer-api-token
+    header: 'Authorization: Bearer <DOVETAIL_API_TOKEN>'
+    detail: authentication/dovetail-authentication.yml
+  identifiers:
+    scheme: base62-uuid
+    length: 22
+    example: 1kf00nQk9yfWKfsTDni8aO
+    detail: >-
+      Every resource is identified by a 22-character Base62-encoded UUID (projects, folders,
+      docs, insights, data/notes, highlights, tags, themes, channels, topics, people, custom
+      fields, users).
+  pagination:
+    default_style: cursor
+    detail: >-
+      Most list resources use opaque cursor pagination via page[limit] and page[start_cursor];
+      the response carries page[total_count], page[has_more] and page[next_cursor] (null when
+      exhausted). Some search endpoints instead use offset/limit (see search_pagination).
+    request_params:
+      - name: page[limit]
+        default: 100
+        max: 100
+      - name: page[start_cursor]
+        description: Opaque cursor from a previous response's page[next_cursor].
+    response_fields:
+      - page[total_count]
+      - page[has_more]
+      - page[next_cursor]
+    search_pagination:
+      - endpoint: POST /v1/search (Magic Search)
+        style: offset
+        params: {offset: 0, limit_default: 50, limit_max: 250}
+      - endpoint: POST /v2/search (Search V2)
+        style: offset
+        params: {offset: 0, limit_default: 20, limit_max: 100}
+  filtering:
+    supported: true
+    detail: List resources accept filter objects to narrow results by entity type/attributes.
+    docs: https://developers.dovetail.com/docs/filters
+  sorting:
+    supported: true
+    detail: List resources accept sort parameters; several default to descending (desc) order.
+    docs: https://developers.dovetail.com/docs/sort
+  content_formats:
+    supported: [markdown, html, plaintext]
+    detail: >-
+      Doc/insight content can be submitted and exported as Markdown, HTML or plain text,
+      easing import from tools like Confluence and Notion.
+    docs: https://developers.dovetail.com/docs/content-formats
+  idempotency:
+    supported: partial
+    key_header: null
+    detail: >-
+      Dovetail does not document a general client-supplied idempotency-key header for writes.
+      The file-upload "complete" endpoints (POST /v2/files/{id}/upload-complete and
+      /large-upload-complete) are documented as idempotent for already-DONE files: retrying a
+      previously-successful complete call returns 200 with the file metadata. No provider-wide
+      idempotency contract is published.
+  rate_limiting:
+    limit: 200
+    window_seconds: 60
+    scope: workspace
+    headers: [X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset]
+    throttled_status: 429
+    retry_header: Retry-After
+    detail: rate-limits/dovetail-rate-limits.yml
+  versioning:
+    scheme: uri-path
+    versions: [v1, v2]
+    detail: v2 introduced for advanced search (POST /v2/search) and the recommended file-upload flow.
+    lifecycle: lifecycle/dovetail-lifecycle.yml
+  errors:
+    envelope: json
+    detail: errors/dovetail-problem-types.yml

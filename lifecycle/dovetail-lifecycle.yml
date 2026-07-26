@@ -1,0 +1,27 @@
+generated: '2026-07-18'
+method: searched
+source: https://developers.dovetail.com/
+description: >-
+  Lifecycle posture for the Dovetail Public API: URI-path versioning (v1/v2), a public status page,
+  and documented deprecation of the v1 file-upload endpoints in favor of v2. No formal, published
+  deprecation policy (Sunset/Deprecation header contract) was found.
+versioning:
+  scheme: uri-path
+  current: v1
+  versions: [v1, v2]
+  docs: https://developers.dovetail.com/docs/introduction
+deprecation:
+  policy_url: null
+  sunset_header: false
+  detail: >-
+    No formal deprecation policy or RFC 8594 Sunset/Deprecation header contract is published.
+    Deprecation is communicated in-docs per endpoint.
+  deprecated_operations:
+    - path: POST /v1/files
+      superseded_by: POST /v2/files/upload and POST /v2/files/large-upload
+      note: v1 file upload deprecated; v2 single-PUT (≤5 GB) / multipart (≤10 GB) recommended.
+status_page: https://status.dovetail.com/
+status_page_mirror: https://dovetail.statuspage.io/
+sla:
+  url: null
+  note: No public API SLA / uptime target found.

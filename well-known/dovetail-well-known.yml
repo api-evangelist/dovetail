@@ -1,0 +1,21 @@
+generated: '2026-07-18'
+method: searched
+source: live probes of /.well-known/* on the Dovetail hosts
+description: >-
+  Probe of the /.well-known/ discovery surface for Dovetail's primary hosts. No well-known
+  documents were served (all 404), so no WellKnown/SecurityTxt pointer is wired into apis.yml.
+  Absence recorded as valid data.
+hosts:
+  - host: https://dovetail.com
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/openid-configuration, status: 404}
+      - {path: /.well-known/oauth-authorization-server, status: 404}
+      - {path: /.well-known/oauth-protected-resource, status: 404}
+      - {path: /.well-known/api-catalog, status: 404}
+      - {path: /.well-known/ai-plugin.json, status: 404}
+  - host: https://developers.dovetail.com
+    documents:
+      - {path: /.well-known/security.txt, status: 404}
+      - {path: /.well-known/openid-configuration, status: 404}
+      - {path: /.well-known/oauth-authorization-server, status: 404}

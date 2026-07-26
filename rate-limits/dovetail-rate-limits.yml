@@ -1,0 +1,36 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+provider: Dovetail
+providerId: dovetail
+generated: '2026-07-18'
+method: searched
+created: '2026-07-18'
+modified: '2026-07-18'
+tags:
+  - Rate Limiting
+  - Customer Research
+description: >-
+  Dovetail Public API rate limits, enforced per workspace. The default is 200 requests per minute
+  per workspace; exceeding it returns 429 with a Retry-After header. Standard X-RateLimit-* headers
+  are returned on every response.
+sources:
+  - https://developers.dovetail.com/docs/rate-limits
+docs: https://developers.dovetail.com/docs/rate-limits
+headers:
+  limit: X-RateLimit-Limit
+  remaining: X-RateLimit-Remaining
+  reset: X-RateLimit-Reset
+  retryAfter: Retry-After
+responseCodes:
+  throttled: 429
+limits:
+  - name: Default request limit
+    scope: workspace
+    metric: requests_per_minute
+    limit: 200
+    limit_count: 200
+    timeFrame: minute
+    window_seconds: 60
+guidance: >-
+  Respect Retry-After (seconds) or X-RateLimit-Reset (Unix timestamp) before retrying; implement
+  exponential backoff with jitter for scheduled/batch tasks.

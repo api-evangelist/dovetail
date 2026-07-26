@@ -1,0 +1,53 @@
+generated: '2026-07-18'
+method: derived
+source: >-
+  Derived from the Dovetail API reference surface documented in developers.dovetail.com (the 104
+  documented endpoints and their nesting) and the resource descriptions in the API introduction.
+  Captures the entity-relationship graph of the workspace research repository. No downloadable
+  OpenAPI was available (dovetail.com/api/v1/openapi.json requires auth), so relationships are
+  derived from documented endpoint paths and resource descriptions, not from a spec file.
+docs: https://developers.dovetail.com/reference
+notation: >-
+  relationships use has_one / has_many / belongs_to with the referencing field/path; direction is
+  from the entity that owns the reference. All resource ids are 22-character Base62 UUIDs.
+entities:
+  - {name: Project, domain: organization, description: A research project; container for docs, insights, data and context.}
+  - {name: Folder, domain: organization, description: A folder grouping projects and other folders in the workspace tree.}
+  - {name: ProjectContext, domain: organization, description: Per-project context configuration of keywords and reference docs.}
+  - {name: Doc, domain: content, description: A document (Markdown/HTML/plaintext) that can carry highlights and comments.}
+  - {name: Insight, domain: content, description: A synthesized insight, exportable and commentable.}
+  - {name: Data, domain: content, description: A data entry (formerly "note") — the unit of imported/analyzed material.}
+  - {name: Note, domain: content, description: Legacy alias of Data; retained note endpoints (/v1/notes).}
+  - {name: Highlight, domain: content, description: A highlighted span within data/docs used to build insights.}
+  - {name: Tag, domain: taxonomy, description: A workspace tag applied to content.}
+  - {name: Theme, domain: taxonomy, description: A theme grouping related highlights/data within a channel.}
+  - {name: Channel, domain: feedback, description: An automated feedback-analysis channel ingesting data points.}
+  - {name: Topic, domain: feedback, description: A topic within a channel used to classify incoming feedback.}
+  - {name: Contact, domain: people, description: A person/contact (research participant or customer).}
+  - {name: User, domain: people, description: A workspace member/user.}
+  - {name: Field, domain: metadata, description: A custom field definition applied to content.}
+  - {name: File, domain: media, description: An uploaded file (v2 single-PUT ≤5 GB / multipart ≤10 GB) with presigned download.}
+  - {name: Comment, domain: collaboration, description: A comment on a doc or insight; resolvable/unresolvable.}
+  - {name: Transcript, domain: media, description: Transcript utterances/audio attached to a data entry.}
+relationships:
+  - {from: Folder, to: Project, kind: has_many, via: folder-contents}
+  - {from: Folder, to: Folder, kind: has_many, via: folder-contents}
+  - {from: Project, to: Data, kind: has_many, via: project}
+  - {from: Project, to: Doc, kind: has_many, via: project}
+  - {from: Project, to: Insight, kind: has_many, via: project}
+  - {from: Project, to: ProjectContext, kind: has_one, via: project-context}
+  - {from: ProjectContext, to: Doc, kind: has_many, via: context-docs}
+  - {from: Data, to: Highlight, kind: has_many, via: data}
+  - {from: Data, to: Transcript, kind: has_one, via: data-id}
+  - {from: Doc, to: Highlight, kind: has_many, via: doc}
+  - {from: Doc, to: Comment, kind: has_many, via: doc-id}
+  - {from: Insight, to: Comment, kind: has_many, via: insight-id}
+  - {from: Insight, to: Highlight, kind: has_many, via: insight}
+  - {from: Highlight, to: Tag, kind: has_many, via: tag}
+  - {from: Channel, to: Topic, kind: has_many, via: channel}
+  - {from: Channel, to: Data, kind: has_many, via: channel-data}
+  - {from: Channel, to: Theme, kind: has_many, via: channel-themes}
+  - {from: Data, to: Field, kind: has_many, via: field}
+  - {from: Doc, to: User, kind: belongs_to, via: user}
+  - {from: Insight, to: User, kind: belongs_to, via: user}
+  - {from: Contact, to: Data, kind: has_many, via: contact}
