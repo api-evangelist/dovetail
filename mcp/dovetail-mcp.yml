@@ -7,31 +7,38 @@ docs:
   self_hosted: https://developers.dovetail.com/docs/mcp-self-hosted
 server:
   name: dovetail
-  transport: http          # Streamable HTTP transport per the MCP specification
+  transport: http
   url: https://dovetail.com/api/mcp
   auth:
-    - oauth2.1             # browser-based sign-in
-    - bearer               # Dovetail API token in the Authorization header
+  - oauth2.1
+  - bearer
 self_hosted:
   available: true
-  runtime: node            # runs locally for STDIO-based clients (node <path-to-index-js>)
+  runtime: node
   docs: https://developers.dovetail.com/docs/mcp-self-hosted
 tools:
-  - name: get_dovetail_projects
-    description: List workspace projects.
-  - name: get_project_highlights
-    description: Retrieve highlights for a project.
-  - name: list_project_insights
-    description: List insights for a project.
-  - name: get_project_insight
-    description: Get a specific insight by ID.
-  - name: get_insight_content
-    description: Retrieve insight content in markdown.
-  - name: list_project_data
-    description: List data entries for a project.
-  - name: get_project_data
-    description: Get a specific data entry by ID.
-  - name: get_data_content
-    description: Get data (note) content in markdown.
-  - name: search_workspace
-    description: Search across all workspace content.
+- name: get_dovetail_projects
+  description: List workspace projects.
+- name: get_project_highlights
+  description: Retrieve highlights for a project.
+- name: list_project_insights
+  description: List insights for a project.
+- name: get_project_insight
+  description: Get a specific insight by ID.
+- name: get_insight_content
+  description: Retrieve insight content in markdown.
+- name: list_project_data
+  description: List data entries for a project.
+- name: get_project_data
+  description: Get a specific data entry by ID.
+- name: get_data_content
+  description: Get data (note) content in markdown.
+- name: search_workspace
+  description: Search across all workspace content.
+deployment:
+  mode: remote
+  endpoint: https://dovetail.com/api/mcp
+  verified: probed
+  probe: gated
+  checked: '2026-08-12'
+  source: catalog MCP census
