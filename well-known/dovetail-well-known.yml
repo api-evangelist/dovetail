@@ -1,21 +1,57 @@
-generated: '2026-07-18'
+generated: '2026-09-19'
 method: searched
 source: live probes of /.well-known/* on the Dovetail hosts
-description: >-
-  Probe of the /.well-known/ discovery surface for Dovetail's primary hosts. No well-known
-  documents were served (all 404), so no WellKnown/SecurityTxt pointer is wired into apis.yml.
-  Absence recorded as valid data.
+description: Probe of the /.well-known/ discovery surface for Dovetail's primary hosts. No well-known
+  documents were served (all 404), so no WellKnown/SecurityTxt pointer is wired into apis.yml. Absence
+  recorded as valid data.
 hosts:
+- host: https://dovetail.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: dovetail-dovetail-oauth-protected-resource.json
+    bytes: 614
+  path_echo_control: passed
+- host: https://developers.dovetail.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+- host: https://auth.dovetail.com
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: dovetail-auth-oauth-authorization-server.json
+    bytes: 2633
+  path_echo_control: passed
+x-mcp-probe:
+  probed: '2026-09-19'
+  issue: roadmap#321, roadmap#337
+  documents:
   - host: https://dovetail.com
-    documents:
-      - {path: /.well-known/security.txt, status: 404}
-      - {path: /.well-known/openid-configuration, status: 404}
-      - {path: /.well-known/oauth-authorization-server, status: 404}
-      - {path: /.well-known/oauth-protected-resource, status: 404}
-      - {path: /.well-known/api-catalog, status: 404}
-      - {path: /.well-known/ai-plugin.json, status: 404}
-  - host: https://developers.dovetail.com
-    documents:
-      - {path: /.well-known/security.txt, status: 404}
-      - {path: /.well-known/openid-configuration, status: 404}
-      - {path: /.well-known/oauth-authorization-server, status: 404}
+    path: /.well-known/oauth-protected-resource
+    file: dovetail-dovetail-oauth-protected-resource.json
+  - host: https://auth.dovetail.com
+    path: /.well-known/oauth-authorization-server
+    file: dovetail-auth-oauth-authorization-server.json
+  validated_on: resource (RFC 9728) / issuer (RFC 8414, OIDC)
+  negative_control: one per host; a 2xx JSON object at an impossible path discards the host
+note: 'MCP-host OAuth discovery added 2026-09-19 (roadmap#321/#337): the harvest visits a provider''s
+  primary hosts, and RFC 9728 protected-resource metadata lives on the MCP host, so these documents existed
+  and were invisible to the scorer. Fetched live and validated on `resource`/`issuer`; one negative control
+  per host.'
