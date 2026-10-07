@@ -115,6 +115,8 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Plans
+  url: plans/dovetail-plans-pricing.yml
 - url: https://dovetail.com/blog/rss.xml
   type: BlogRSS
 - type: Website
