@@ -33,3 +33,25 @@ plans:
   period: none
   included_quota: Everything in Free, plus unlimited Agents, channels, projects, Docs, free chat queries,
     dashboards, advanced AI, security and support features
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - free
+  units: []
+  plans:
+  - name: Free
+    access: other
+    model: free
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Enterprise
+    access: other
+    model: unstated
+    model_how: derived
+    units: []
+    periods:
+    - none
