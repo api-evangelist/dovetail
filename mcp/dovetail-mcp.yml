@@ -42,3 +42,42 @@ deployment:
   probe: gated
   checked: '2026-08-12'
   source: catalog MCP census
+rfc9728:
+  endpoint: https://dovetail.com/api/mcp
+  metadata_url: https://dovetail.com/.well-known/oauth-protected-resource/api/mcp
+  discovered_via: WWW-Authenticate resource_metadata on an anonymous POST initialize
+  fetched: '2026-09-25'
+  http_status: 200
+  content_type: application/json
+  document:
+    resource: https://dovetail.com/api/mcp
+    authorization_servers:
+    - https://auth.dovetail.com
+    scopes_supported:
+    - audit_logs:read
+    - channel:read
+    - channel:write
+    - chat:read
+    - chat:write
+    - contact:read
+    - contact:write
+    - data:file_import
+    - doc:file_import
+    - email
+    - field:read
+    - field:write
+    - file:read
+    - insight:read
+    - insight:write
+    - note:read
+    - note:write
+    - offline_access
+    - openid
+    - profile
+    - project:read
+    - project:write
+    - search:read
+    - user:read
+    bearer_methods_supported:
+    - header
+    resource_documentation: https://dovetail.com/help/api
