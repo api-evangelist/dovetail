@@ -444,3 +444,16 @@
   relationship: ipaas-bridge
   status: pending-generation
   arazzo: null
+- slug: dovetail-okta-own
+  label: Okta (own)
+  partner: okta
+  partner_name: Okta (own)
+  category: Directory and HR Sync
+  type: marketplace
+  marketplace: own
+  channel: partner-built
+  evidence: https://www.okta.com/integrations/dovetail/
+  source: edge
+  relationship: platform-app
+  status: not-a-workflow
+  arazzo: null
