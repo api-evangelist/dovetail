@@ -1,21 +1,28 @@
 aid: dovetail
+
 name: Dovetail
-description: 'Dovetail is a customer intelligence platform that aggregates customer feedback from
-  sales calls, support tickets, user-research sessions, surveys and other channels, then uses AI to
-  transcribe, analyze, tag and structure it into a searchable research repository. Teams across product,
-  design, research, customer experience, sales and marketing turn that signal into insights, docs,
-  dashboards and automated agents. The Dovetail Public API (base https://dovetail.com/api/v1) exposes
-  projects, folders, docs, insights, data (notes), highlights, tags, themes, channels, topics, contacts,
-  users, custom fields, files, comments and transcripts, plus Magic Search, Search V2 and Magic
-  Summarize, and an official hosted MCP server for AI agents. Backed by Accel and Felicis.'
+
+description: Dovetail is a customer intelligence platform that aggregates customer feedback from sales calls, support tickets, user-research sessions,
+  surveys and other channels, then uses AI to transcribe, analyze, tag and structure it into a searchable research repository. Teams across product,
+  design, research, customer experience, sales and marketing turn that signal into insights, docs, dashboards and automated agents. The Dovetail
+  Public API (base https://dovetail.com/api/v1) exposes projects, folders, docs, insights, data (notes), highlights, tags, themes, channels, topics,
+  contacts, users, custom fields, files, comments and transcripts, plus Magic Search, Search V2 and Magic Summarize, and an official hosted MCP
+  server for AI agents. Backed by Accel and Felicis.
+
 url: https://raw.githubusercontent.com/api-evangelist/dovetail/refs/heads/main/apis.yml
+
 x-type: company
+
 x-source: vc-portfolio
+
 x-backed-by:
 - accel
 - felicis
+
 x-tier: stub
+
 x-tier-reason: portfolio-lead
+
 deliveryModel:
   model: saas
   open_source: false
@@ -27,6 +34,7 @@ deliveryModel:
   - pricing
   generated: '2026-08-28'
   method: derived
+
 accessModel:
   pricing: unknown
   onboarding: self-serve
@@ -39,13 +47,21 @@ accessModel:
   - authentication
   generated: '2026-07-22'
   method: derived
+
 specificationVersion: '0.23'
+
 created: '2026-07-17'
+
 modified: '2026-10-06'
+
 image: https://dovetail.com/media/Social_Meta1.png
+
 x-docs-platform: readme
+
 x-docs-platform-confidence: high
+
 x-docs-platform-checked: 2026-09-25
+
 tags:
 - Company
 - Consumer
@@ -57,6 +73,7 @@ tags:
 - Analytics
 - Artificial Intelligence
 - Product Management
+
 tags_raw:
 - Company
 - Consumer
@@ -68,53 +85,34 @@ tags_raw:
 - Analytics
 - AI
 - Product Management
-apis:
-- name: Dovetail API
-  description: 'Dovetail Public API for building custom integrations against a Dovetail workspace:
-    manage projects, folders, docs, insights, data (notes), highlights, tags, themes, channels, topics,
-    contacts, users, custom fields, files, comments and transcripts; run Magic Search, Search V2 and
-    Magic Summarize. Bearer API-token auth; cursor-based pagination; 200 requests/minute per workspace.'
-  humanURL: https://developers.dovetail.com/
-  baseURL: https://dovetail.com/api/v1/
-  tags:
-  - Customer Research
-  - Insights
-  - Search
-  - Artificial Intelligence
-  tags_raw:
-  - Customer Research
-  - Insights
-  - Search
-  - AI
-  properties:
-  - type: Documentation
-    url: https://developers.dovetail.com/docs/introduction
-  - type: APIReference
-    url: https://developers.dovetail.com/reference
-  - type: GettingStarted
-    url: https://developers.dovetail.com/docs/introduction
-  - type: Authentication
-    url: authentication/dovetail-authentication.yml
-  - type: RateLimits
-    url: rate-limits/dovetail-rate-limits.yml
-  - type: Conventions
-    url: conventions/dovetail-conventions.yml
-  - type: ErrorCatalog
-    url: errors/dovetail-problem-types.yml
-  - type: DataModel
-    url: data-model/dovetail-data-model.yml
-  - type: Lifecycle
-    url: lifecycle/dovetail-lifecycle.yml
-  - type: MCPServer
-    url: mcp/dovetail-mcp.yml
-  - type: LLMsTxt
-    url: llms/dovetail-llms.txt
+
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+
 common:
+- type: AgenticAccess
+  url: agentic-access/dovetail-agentic-access.yml
+- type: Spectral
+  url: rules/dovetail-rules.yml
+- type: Vocabulary
+  url: vocabulary/dovetail-vocabulary.yml
+- type: Deprecation
+  url: lifecycle/dovetail-lifecycle.yml
+- type: Conformance
+  url: conformance/dovetail-conformance.yml
+- type: AgentCard
+  url: a2a/dovetail-a2a.yml
+- type: WellKnown
+  url: well-known/dovetail-well-known.yml
+- type: Hosts
+  url: hosts/dovetail-hosts.yml
+- type: IntegrationEdges
+  url: integrations/dovetail-integration-edges.yml
+- type: Vendors
+  url: vendors/dovetail-vendors.yml
 - type: Plans
   url: plans/dovetail-plans-pricing.yml
 - url: https://dovetail.com/blog/rss.xml
@@ -171,8 +169,59 @@ common:
   url: lifecycle/dovetail-lifecycle.yml
 - type: DomainSecurity
   url: security/dovetail-domain-security.yml
+
+apis:
+- name: Dovetail API
+  description: 'Dovetail Public API for building custom integrations against a Dovetail workspace: manage projects, folders, docs, insights, data
+    (notes), highlights, tags, themes, channels, topics, contacts, users, custom fields, files, comments and transcripts; run Magic Search, Search
+    V2 and Magic Summarize. Bearer API-token auth; cursor-based pagination; 200 requests/minute per workspace.'
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Customer Research
+  - Insights
+  - Search
+  - Artificial Intelligence
+  tags_raw:
+  - Customer Research
+  - Insights
+  - Search
+  - AI
+  properties:
+  - url: openapi/dovetail-public-api-openapi.yml
+    type: OpenAPI
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: MCPServer
+    url: mcp/dovetail-mcp.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+  aid: dovetail:dovetail-api
+
 x-enrichment:
   date: '2026-07-19'
   status: backfilled
   pass: local-v1
   note: backfilled from .gitignore signal + verified work evidence
+
+x-readme-harvest:
+  date: '2026-10-14'
+  ops: 111
+  tool: harvest-readme-openapi.py
+  portal: https://developers.dovetail.com

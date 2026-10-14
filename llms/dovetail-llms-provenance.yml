@@ -1,0 +1,6 @@
+generated: '2026-10-14'
+method: probed
+generator: harvest-llms.py
+source: https://dovetail.com/llms.txt
+bytes: 7169
+note: saved verbatim; the provider's own document

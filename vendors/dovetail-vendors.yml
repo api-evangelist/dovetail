@@ -1,0 +1,95 @@
+generated: '2026-10-14'
+method: probed
+source: pre-flight dossier (docs platform, portal detections) + CNAME chains and response headers of the hosts apis.yml names
+registry: all/0-working/vendors.yml
+areas_vocabulary:
+- documentation
+- developer-portal
+- api-gateway
+- cdn
+- hosting
+- sdk-generation
+- api-collections
+- status-page
+- support
+- community
+- identity
+- mcp-hosting
+vendors:
+- vendor: cloudflare
+  name: Cloudflare
+  area: cdn
+  host: developers.dovetail.com
+  evidence: header:cf-ray
+  signal: header
+  confidence: high
+  kin_score:
+  - https_enforced
+  - hsts
+- vendor: cloudfront
+  name: Amazon CloudFront
+  area: cdn
+  host: dovetail.com
+  evidence: header:x-amz-cf-id
+  signal: header
+  confidence: high
+  kin_score: []
+- vendor: netlify
+  name: Netlify
+  area: hosting
+  host: dovetail.com
+  evidence: header:x-nf-request-id
+  signal: header
+  confidence: high
+  kin_score: []
+- vendor: vercel
+  name: Vercel
+  area: hosting
+  host: docs.dovetail.com
+  evidence: cname:vercel-dns.com
+  signal: cname
+  confidence: high
+  kin_score: []
+- vendor: auth0
+  name: Auth0 (Okta)
+  area: identity
+  host: auth.dovetail.com
+  evidence: dovetail-auth-oauth-authorization-server.json names auth0 in its OAuth metadata
+  signal: oauth-metadata
+  confidence: high
+  kin_score:
+  - authentication
+- vendor: instatus
+  name: Instatus
+  area: status-page
+  host: status.dovetail.com
+  evidence: cname:instatus.com
+  signal: cname
+  confidence: high
+  kin_score:
+  - status_page
+reliance:
+  areas_vendor_served:
+  - cdn
+  - hosting
+  - identity
+  - status-page
+  vendor_count: 6
+  areas_observed: 12
+  share_of_observable_areas: 0.333
+  note: areas where a third party was DETECTED serving this provider; an area absent here was either self-run or not observed, and this script
+    cannot tell those apart
+checked:
+- 'docs-platform: not probed'
+- dovetail.com (Website)
+- developers.dovetail.com (DeveloperPortal)
+- developers.dovetail.com (Documentation)
+- developers.dovetail.com (APIReference)
+- developers.dovetail.com (GettingStarted)
+- dovetail.com (SignUp)
+- app.dovetail.com (Login)
+- docs.dovetail.com (Support)
+- docs.dovetail.com (HelpCenter)
+- status.dovetail.com (StatusPage)
+- dovetail.com (baseURL)
+- dovetail.com (mcp)

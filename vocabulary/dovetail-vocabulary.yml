@@ -1,0 +1,134 @@
+generated: '2026-10-14'
+method: derived
+generator: derive-vocabulary.py
+source: openapi/dovetail-public-api-openapi.yml
+vocabulary:
+  name: Dovetail Domain Vocabulary
+  description: 'Terms declared by Dovetail''s own API contract: its resource groups, objects and enumerations, with the contract''s definitions.
+    Derived, not authored.'
+  version: '2026-10-14'
+  terms:
+  - term: Channels
+    definition: 'Resource group in the contract; its operation POST /v1/channels: Create a new channel in your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Contacts
+    definition: 'Resource group in the contract; its operation GET /v1/contacts: Retrieve all contacts in your workspace''s contacts database.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Data
+    definition: 'Resource group in the contract; its operation GET /v1/data: Retrieve all data entries in your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Datasets
+    definition: 'Resource group in the contract; its operation POST /v1/dataset/{dataset_id}/data: Send a new data point to a dataset, without
+      it having to belong to a channel.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Docs
+    definition: 'Resource group in the contract; its operation GET /v1/docs: Retrieve all docs in your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: DocComments
+    definition: 'Resource group in the contract; its operation GET /v1/docs/{doc_id}/comments: Get a list of page-level and inline comments on
+      a doc.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Fields
+    definition: 'Resource group in the contract; its operation GET /v1/fields: Get a list of fields for a project or workspace field group.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Files
+    definition: 'Resource group in the contract; its operation POST /v1/files/: **Deprecated** — use the v2 upload endpoints for new integrations:
+      `POST /v2/files/upload` for files up to 5 GB and `POST /v2/files/large-upload` for files up to 10 GB.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Folders
+    definition: 'Resource group in the contract; its operation GET /v1/folders: Retrieve all folders in your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Highlights
+    definition: 'Resource group in the contract; its operation GET /v1/highlights: Retrieve all highlights in your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Insights
+    definition: 'Resource group in the contract; its operation GET /v1/insights: Retrieve all insights in your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: InsightComments
+    definition: 'Resource group in the contract; its operation GET /v1/insights/{insight_id}/comments: Get a list of page-level and inline comments
+      on an insight.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Notes
+    definition: 'Resource group in the contract; its operation GET /v1/notes: Retrieve all data entries (notes) in your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Projects
+    definition: 'Resource group in the contract; its operation GET /v1/projects: Retrieve all projects in your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Search
+    definition: 'Resource group in the contract; its operation POST /v1/search: Perform a full-text search across your workspace''s content.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Summarize
+    definition: 'Resource group in the contract; its operation POST /v1/summarize: Generate an AI-powered summary from a collection of highlights,
+      data entries (notes), insights, themes, and/or tags.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Tags
+    definition: 'Resource group in the contract; its operation GET /v1/tags: Retrieve all tags in your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Authentication
+    definition: 'Resource group in the contract; its operation GET /v1/token/info: Retrieve information about the API token used to authenticate
+      this request.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Transcripts
+    definition: 'Resource group in the contract; its operation PUT /v1/transcripts/{data_id}: Create or replace a data entry''s live transcript
+      by fetching a Recall async transcript JSON from `download_url`, mapping participant names to speaker labels, and writing the result in a
+      single commit.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Users
+    definition: 'Resource group in the contract; its operation GET /v1/users: Retrieve all members of your workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: Workspace
+    definition: 'Resource group in the contract; its operation GET /v1/workspace/context: Retrieve the AI context for the workspace: linked insight
+      docs used as source material for workspace-wide AI features.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: FilesV2
+    definition: 'Resource group in the contract; its operation POST /v2/files/large-upload: Initiate a multipart upload for files **up to 10 GB**.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml
+  - term: SearchV2
+    definition: 'Resource group in the contract; its operation POST /v2/search: Perform an advanced search across your entire Dovetail workspace.'
+    tags:
+    - Resource Group
+    source: openapi/dovetail-public-api-openapi.yml

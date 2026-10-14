@@ -1,0 +1,86 @@
+generated: '2026-10-14'
+method: derived
+source: the pre-flight dossier, apis.yml pointers, spec servers, well-known, vendors -- nothing fetched here
+generator: derive-hosts.py
+summary:
+  hosts: 6
+  own: 6
+  other_domain: 0
+  platform: 0
+  roles:
+  - identity
+  - other
+  - portal
+  - status
+  - support
+  - website
+hosts:
+- host: app.dovetail.com
+  found_by:
+  - pointer
+  types:
+  - Login
+  serves: []
+  registrable_domain: dovetail.com
+  role: identity
+  relation: own
+- host: developers.dovetail.com
+  found_by:
+  - pointer
+  - apis[]
+  types:
+  - DeveloperPortal
+  - Documentation
+  - APIReference
+  - GettingStarted
+  serves:
+  - docs
+  registrable_domain: dovetail.com
+  role: portal
+  relation: own
+- host: docs.dovetail.com
+  found_by:
+  - pointer
+  types:
+  - Support
+  - HelpCenter
+  serves: []
+  registrable_domain: dovetail.com
+  role: support
+  relation: own
+- host: dovetail.com
+  found_by:
+  - pointer
+  - apis[]
+  types:
+  - BlogRSS
+  - Website
+  - SignUp
+  - Pricing
+  - Blog
+  - TermsOfService
+  - PrivacyPolicy
+  - ChangeLog
+  serves:
+  - api
+  registrable_domain: dovetail.com
+  role: website
+  relation: own
+- host: status.dovetail.com
+  found_by:
+  - pointer
+  types:
+  - StatusPage
+  serves: []
+  registrable_domain: dovetail.com
+  role: status
+  relation: own
+- host: trust.dovetail.com
+  found_by:
+  - pointer
+  types:
+  - TrustCenter
+  serves: []
+  registrable_domain: dovetail.com
+  role: other
+  relation: own
