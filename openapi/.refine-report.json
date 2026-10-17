@@ -1,0 +1,68 @@
+{
+  "provider": "dovetail",
+  "sources": [
+    "dovetail-public-api-openapi.yml"
+  ],
+  "outputs": [
+    "dovetail-authentication-api-openapi.yml",
+    "dovetail-channels-api-openapi.yml",
+    "dovetail-contacts-api-openapi.yml",
+    "dovetail-data-api-openapi.yml",
+    "dovetail-datasets-api-openapi.yml",
+    "dovetail-doccomments-api-openapi.yml",
+    "dovetail-docs-api-openapi.yml",
+    "dovetail-fields-api-openapi.yml",
+    "dovetail-files-api-openapi.yml",
+    "dovetail-filesv2-api-openapi.yml",
+    "dovetail-folders-api-openapi.yml",
+    "dovetail-highlights-api-openapi.yml",
+    "dovetail-insightcomments-api-openapi.yml",
+    "dovetail-insights-api-openapi.yml",
+    "dovetail-notes-api-openapi.yml",
+    "dovetail-projects-api-openapi.yml",
+    "dovetail-search-api-openapi.yml",
+    "dovetail-searchv2-api-openapi.yml",
+    "dovetail-summarize-api-openapi.yml",
+    "dovetail-tags-api-openapi.yml",
+    "dovetail-transcripts-api-openapi.yml",
+    "dovetail-users-api-openapi.yml",
+    "dovetail-workspace-api-openapi.yml"
+  ],
+  "archived": [
+    "deleted 1 superseded output(s) from the previous generation"
+  ],
+  "errors": [],
+  "warnings": [
+    "dovetail-public-api-openapi.yml: previously refined output kept for 111 operation(s) no archived document covers (e.g. /v1/channels get, /v1/channels post, /v1/channels/data post); its other 0 operation(s) came from the archive and were dropped from it. The archive is incomplete for this provider \u2014 re-harvest to restore _original/ as the full source of truth."
+  ],
+  "notes": [
+    "sourced from openapi/_original/ (0 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "dovetail-public-api-openapi.yml: upgraded openapi 3.0.2 -> OpenAPI 3.2.0",
+    "dovetail-public-api-openapi.yml: declared missing tag: Authentication",
+    "dovetail-public-api-openapi.yml: declared missing tag: Channels",
+    "dovetail-public-api-openapi.yml: declared missing tag: Contacts",
+    "dovetail-public-api-openapi.yml: declared missing tag: Data",
+    "dovetail-public-api-openapi.yml: declared missing tag: Datasets",
+    "dovetail-public-api-openapi.yml: declared missing tag: DocComments",
+    "dovetail-public-api-openapi.yml: declared missing tag: Docs",
+    "dovetail-public-api-openapi.yml: declared missing tag: Fields",
+    "dovetail-public-api-openapi.yml: declared missing tag: Files",
+    "dovetail-public-api-openapi.yml: declared missing tag: FilesV2",
+    "dovetail-public-api-openapi.yml: declared missing tag: Folders",
+    "dovetail-public-api-openapi.yml: declared missing tag: Highlights",
+    "dovetail-public-api-openapi.yml: declared missing tag: InsightComments",
+    "dovetail-public-api-openapi.yml: declared missing tag: Insights",
+    "dovetail-public-api-openapi.yml: declared missing tag: Notes",
+    "dovetail-public-api-openapi.yml: declared missing tag: Projects",
+    "dovetail-public-api-openapi.yml: declared missing tag: Search",
+    "dovetail-public-api-openapi.yml: declared missing tag: SearchV2",
+    "dovetail-public-api-openapi.yml: declared missing tag: Summarize",
+    "dovetail-public-api-openapi.yml: declared missing tag: Tags",
+    "dovetail-public-api-openapi.yml: declared missing tag: Transcripts",
+    "dovetail-public-api-openapi.yml: declared missing tag: Users",
+    "dovetail-public-api-openapi.yml: declared missing tag: Workspace",
+    "superseded outputs removed: dovetail-public-api-openapi.yml",
+    "apis.yml register: written (+23 apis, 23 total)"
+  ],
+  "skipped": []
+}

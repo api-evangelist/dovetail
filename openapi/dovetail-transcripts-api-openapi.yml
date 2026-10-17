@@ -1,0 +1,1057 @@
+openapi: 3.2.0
+info:
+  title: Dovetail Public Transcripts API
+  version: 0.0.1
+  description: The Dovetail Public API provides programmatic access to your Dovetail workspace.
+servers:
+- url: https://dovetail.com/api
+- url: https://dovetailapp.com/api
+security:
+- bearerAuth: []
+tags:
+- name: Transcripts
+paths:
+  /v1/transcripts/{data_id}:
+    put:
+      description: 'Create or replace a data entry''s live transcript by fetching a Recall
+
+        async transcript JSON from `download_url`, mapping participant names
+
+        to speaker labels, and writing the result in a single commit.
+
+        Broadcasts the change to connected clients. A transcript with no
+
+        usable speech writes a "no speech detected" transcript and returns
+
+        200 with `written: 0`, so media can still be attached. Returns 400
+
+        if the URL is unsafe, unreachable, or the payload cannot be read.
+
+        Returns 409 if the transcript is already wrapped in an audio/video
+
+        block (media has been attached).'
+      summary: Set transcript from download URL
+      tags:
+      - Transcripts
+      parameters:
+      - name: data_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the data entry.
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                download_url:
+                  type: string
+                  format: uri
+                  description: HTTPS URL of a Recall async transcript JSON download (media_shortcuts.transcript data.download_url). The server fetches, maps speakers, and replaces the live transcript.
+                  example: https://example.com/transcript.json
+                join_url:
+                  type: string
+                  maxLength: 2048
+                  format: uri
+                  description: Optional HTTPS meeting join URL from the companion recording client (e.g. Zoom/Meet/Teams window URL). Used server-side to match a cached calendar meeting and link matching attendees to transcript speakers.
+                  example: https://zoom.us/j/123456789
+                recorded_at:
+                  type: string
+                  description: Optional ISO 8601 wall-clock time of the recording (e.g. when the companion session started). Used with `join_url` to match the correct near-term calendar meeting when the upload is delayed. When omitted, the server uses request arrival time.
+                  example: '2026-08-17T03:00:00.000Z'
+                video_download_url:
+                  type: string
+                  format: uri
+                  description: Optional HTTPS URL of a Recall mixed MP4 download. Accepted for forward compatibility; the server does not download or attach video from this field yet.
+                  example: https://example.com/video.mp4
+              required:
+              - download_url
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      written:
+                        type: number
+                        description: Total number of words saved across all utterances.
+                    required:
+                    - written
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - InvalidOperation
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - ValidationError
+                          title:
+                            type: string
+                            enum:
+                            - Contract violation
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                        - message
+                        - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '409':
+          description: '409'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InvalidOperation
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: putV1TranscriptsByDataId
+      x-operation-id-source: derived
+  /v1/transcripts/{data_id}/audio:
+    post:
+      description: 'Attach an already-uploaded audio file to the live transcript on a data
+
+        entry. The transcript node currently being written to via
+
+        `appendLiveTranscriptUtterance` or `setLiveTranscript` is wrapped in
+
+        an audio/video block carrying the supplied `file_id`, giving the
+
+        editor audio playback + transcript-sync.
+
+
+        Idempotent for the same `file_id` (returns 200). Returns 409 if the
+
+        transcript is already wrapped with a different `file_id`. Returns 404
+
+        if the data entry does not exist.'
+      summary: Attach audio
+      tags:
+      - Transcripts
+      parameters:
+      - name: data_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the data entry.
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_id:
+                  type: string
+                  description: ID of an already-uploaded audio file to attach.
+              required:
+              - file_id
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties: {}
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - InvalidOperation
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - ValidationError
+                          title:
+                            type: string
+                            enum:
+                            - Contract violation
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                        - message
+                        - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '409':
+          description: '409'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InvalidOperation
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV1TranscriptsByDataIdAudio
+      x-operation-id-source: derived
+  /v1/transcripts/{data_id}/utterance:
+    post:
+      description: 'Add a finalised utterance to a data entry''s transcript and broadcast it
+
+        to connected clients. If the entry has no transcript, one is created
+
+        automatically. Send finalised utterances only.'
+      summary: Add utterance
+      tags:
+      - Transcripts
+      parameters:
+      - name: data_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the data entry.
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                speaker_label:
+                  type: string
+                  minLength: 1
+                  maxLength: 36
+                  description: Speaker label for this utterance, such as "A" or "B".
+                  example: A
+                words:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                        minLength: 1
+                      start:
+                        type: number
+                        minimum: 0
+                        description: Word start time, in seconds, relative to the recording's start.
+                      end:
+                        type: number
+                        minimum: 0
+                        description: Word end time, in seconds, relative to the recording's start.
+                    required:
+                    - text
+                    - start
+                    - end
+                  minItems: 1
+                  maxItems: 1000
+                  description: Finalised words in this utterance, in order. Word start/end timestamps are in seconds.
+              required:
+              - speaker_label
+              - words
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      written:
+                        type: number
+                        description: Number of words saved.
+                    required:
+                    - written
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - InvalidOperation
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - ValidationError
+                          title:
+                            type: string
+                            enum:
+                            - Contract violation
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                        - message
+                        - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV1TranscriptsByDataIdUtterance
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+x-provenance:
+  method: searched
+  source: https://developers.dovetail.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://developers.dovetail.com/reference/delete_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/delete_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/delete_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/delete_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/delete_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/delete_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-data.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-themes.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-data-datum-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels.md
+  - https://developers.dovetail.com/reference/get_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/get_v1-contacts.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/get_v1-data.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs.md
+  - https://developers.dovetail.com/reference/get_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/get_v1-fields.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id-download.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id-contents.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders.md
+  - https://developers.dovetail.com/reference/get_v1-highlights-highlight-id.md
+  - https://developers.dovetail.com/reference/get_v1-highlights.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/get_v1-notes.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id-context.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-projects-templates.md
+  - https://developers.dovetail.com/reference/get_v1-projects.md
+  - https://developers.dovetail.com/reference/get_v1-tags-boards.md
+  - https://developers.dovetail.com/reference/get_v1-tags-tag-id.md
+  - https://developers.dovetail.com/reference/get_v1-tags.md
+  - https://developers.dovetail.com/reference/get_v1-token-info.md
+  - https://developers.dovetail.com/reference/get_v1-users-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-users.md
+  - https://developers.dovetail.com/reference/get_v1-workspace-context.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/patch_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/patch_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/patch_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/patch_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/patch_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/patch_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/post_v1-channels-data.md
+  - https://developers.dovetail.com/reference/post_v1-channels-topic.md
+  - https://developers.dovetail.com/reference/post_v1-channels.md
+  - https://developers.dovetail.com/reference/post_v1-contacts.md
+  - https://developers.dovetail.com/reference/post_v1-data-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-data.md
+  - https://developers.dovetail.com/reference/post_v1-dataset-dataset-id-data.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-docs-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-docs.md
+  - https://developers.dovetail.com/reference/post_v1-fields.md
+  - https://developers.dovetail.com/reference/post_v1-files.md
+  - https://developers.dovetail.com/reference/post_v1-folders.md
+  - https://developers.dovetail.com/reference/post_v1-highlights-highlight-id-tags.md
+  - https://developers.dovetail.com/reference/post_v1-highlights.md
+  - https://developers.dovetail.com/reference/post_v1-insights-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-insights.md
+  - https://developers.dovetail.com/reference/post_v1-notes-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-notes.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-docs.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-workspace-field-groups.md
+  - https://developers.dovetail.com/reference/post_v1-projects.md
+  - https://developers.dovetail.com/reference/post_v1-search.md
+  - https://developers.dovetail.com/reference/post_v1-summarize.md
+  - https://developers.dovetail.com/reference/post_v1-tags.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-audio.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-utterance.md
+  - https://developers.dovetail.com/reference/post_v1-workspace-context-docs.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-large-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-large-upload.md
+  - https://developers.dovetail.com/reference/post_v2-files-upload.md
+  - https://developers.dovetail.com/reference/post_v2-search.md
+  - https://developers.dovetail.com/reference/put_v1-transcripts-data-id.md
+  merge:
+    pages: 111
+    deduped: 110
+    conflicts_kept_first: 0

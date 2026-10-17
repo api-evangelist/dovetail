@@ -1,0 +1,1090 @@
+openapi: 3.2.0
+info:
+  title: Dovetail Public Search API
+  version: 0.0.1
+  description: The Dovetail Public API provides programmatic access to your Dovetail workspace.
+servers:
+- url: https://dovetail.com/api
+- url: https://dovetailapp.com/api
+security:
+- bearerAuth: []
+tags:
+- name: Search
+paths:
+  /v1/search:
+    post:
+      description: 'Perform a full-text search across your workspace''s content. Returns matching highlights, data (notes), insights, channels, tags, and themes in a single response.
+
+
+        Use the `query` field for keyword search, or provide structured `filter` objects to narrow results by specific entity types and their attributes. To include a content type with no filter constraints, pass an empty array for that type (e.g. `"notes": []`). Types omitted from the filter are excluded from results. The `notes` key in the filter and response corresponds to the "data" resource in the Dovetail product.
+
+
+        Results are paginated using `offset` and `limit` (default 50, max 250). Each content type is returned in its own array within the response.
+
+
+        > 📘 Prefer Search V2
+
+        >
+
+        > For more advanced filtering including location-based search, contributor filters, and additional content types (projects, folders, people, dashboards, agents), use the **Search V2** (`POST /v2/search`) endpoint.'
+      summary: Magic Search
+      tags:
+      - Search
+      parameters: []
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                offset:
+                  default: 0
+                  type: integer
+                  minimum: 0
+                  description: An optional offset - will default to 0 if not provided.
+                limit:
+                  default: 50
+                  type: integer
+                  minimum: 0
+                  maximum: 250
+                  description: A limit of search item results (highlights, notes, insights, channels and/or themes), if not provided it will be defaulted to 50 with a maximum of 250 search items per request.
+                filter:
+                  type: object
+                  properties:
+                    notes:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          title:
+                            type: object
+                            properties:
+                              contains:
+                                type: string
+                                description: Substring to search for within the target string
+                              equal_to:
+                                type: string
+                                description: IN operator
+                          authors:
+                            type: object
+                            properties:
+                              overlaps:
+                                type: array
+                                items:
+                                  type: string
+                                description: Checks for any overlapping elements with the target array
+                          content:
+                            type: object
+                            properties:
+                              contains:
+                                type: string
+                                description: Substring to search for within the target string
+                              empty:
+                                type: boolean
+                                description: Empty or non-empty flag
+                              equal_to:
+                                type: string
+                                description: IN operator
+                          created_at:
+                            type: object
+                            properties:
+                              equal_to:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Equal to operator
+                              greater_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Great than operator
+                              less_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Less than operator
+                      description: Filter results based on note's title, authors, content and created_at.
+                    tags:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          title:
+                            type: object
+                            properties:
+                              contains:
+                                type: string
+                                description: Substring to search for within the target string
+                              equal_to:
+                                type: string
+                                description: IN operator
+                          description:
+                            type: object
+                            properties:
+                              contains:
+                                type: string
+                                description: Substring to search for within the target string
+                              empty:
+                                type: boolean
+                                description: Empty or non-empty flag
+                              equal_to:
+                                type: string
+                                description: IN operator
+                          highlight_count:
+                            type: object
+                            properties:
+                              equal_to:
+                                type: number
+                                description: Equal to operator
+                              greater_than:
+                                type: number
+                                description: Great than operator
+                              less_than:
+                                type: number
+                                description: Less than operator
+                          created_at:
+                            type: object
+                            properties:
+                              equal_to:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Equal to operator
+                              greater_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Great than operator
+                              less_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Less than operator
+                      description: Filter results based on tag's title, description, highlight_count and created_at.
+                    highlights:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          authors:
+                            type: object
+                            properties:
+                              overlaps:
+                                type: array
+                                items:
+                                  type: string
+                                description: Checks for any overlapping elements with the target array
+                          created_at:
+                            type: object
+                            properties:
+                              equal_to:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Equal to operator
+                              greater_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Great than operator
+                              less_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Less than operator
+                          id:
+                            type: object
+                            properties:
+                              empty:
+                                type: boolean
+                                description: Empty or non-empty flag
+                              equal_to:
+                                type: string
+                                description: Equal to operator
+                              in:
+                                type: array
+                                items:
+                                  type: string
+                                description: IN operator
+                          text:
+                            type: object
+                            properties:
+                              contains:
+                                type: string
+                                description: Substring to search for within the target string
+                              empty:
+                                type: boolean
+                                description: Empty or non-empty flag
+                              equal_to:
+                                type: string
+                                description: IN operator
+                          note:
+                            type: object
+                            properties:
+                              empty:
+                                type: boolean
+                                description: Empty or non-empty flag
+                              equal_to:
+                                type: string
+                                description: Equal to operator
+                              in:
+                                type: array
+                                items:
+                                  type: string
+                                description: IN operator
+                          tags:
+                            type: object
+                            properties:
+                              contains:
+                                type: array
+                                items:
+                                  type: string
+                                description: IN operator
+                              empty:
+                                type: boolean
+                                description: Empty or non-empty flag
+                              overlaps:
+                                type: array
+                                items:
+                                  type: string
+                                description: Checks for any overlapping elements with the target array
+                      description: Filter results based on highlight's authors, created_at, id, text, note and tags.
+                    insights:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          authors:
+                            type: object
+                            properties:
+                              overlaps:
+                                type: array
+                                items:
+                                  type: string
+                                description: Checks for any overlapping elements with the target array
+                          created_at:
+                            type: object
+                            properties:
+                              equal_to:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Equal to operator
+                              greater_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Great than operator
+                              less_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Less than operator
+                          id:
+                            type: object
+                            properties:
+                              empty:
+                                type: boolean
+                                description: Empty or non-empty flag
+                              equal_to:
+                                type: string
+                                description: Equal to operator
+                              in:
+                                type: array
+                                items:
+                                  type: string
+                                description: IN operator
+                          title:
+                            type: object
+                            properties:
+                              contains:
+                                type: string
+                                description: Substring to search for within the target string
+                              equal_to:
+                                type: string
+                                description: IN operator
+                          contributors:
+                            type: object
+                            properties:
+                              overlaps:
+                                type: array
+                                items:
+                                  type: string
+                                description: Checks for any overlapping elements with the target array
+                      description: Filter results based on insight's authors, created_at, id, title and contributors.
+                    channels:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          title:
+                            type: object
+                            properties:
+                              contains:
+                                type: string
+                                description: Substring to search for within the target string
+                              equal_to:
+                                type: string
+                                description: IN operator
+                          authors:
+                            type: object
+                            properties:
+                              overlaps:
+                                type: array
+                                items:
+                                  type: string
+                                description: Checks for any overlapping elements with the target array
+                          created_at:
+                            type: object
+                            properties:
+                              equal_to:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Equal to operator
+                              greater_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Great than operator
+                              less_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Less than operator
+                      description: Filter results based on channel's authors, created_at, and title.
+                    themes:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          title:
+                            type: object
+                            properties:
+                              contains:
+                                type: string
+                                description: Substring to search for within the target string
+                              equal_to:
+                                type: string
+                                description: IN operator
+                          created_at:
+                            type: object
+                            properties:
+                              equal_to:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Equal to operator
+                              greater_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Great than operator
+                              less_than:
+                                type:
+                                - string
+                                - 'null'
+                                format: date-time
+                                description: Less than operator
+                      description: Filter results based on theme's created_at, title/summary.
+                  additionalProperties: false
+                  description: An optional filter for search. Please provide an empty array if you want to include other objects.
+                query:
+                  default: ''
+                  type: string
+                  description: An optional query to search the highlights, notes, insights, channels and/or themes.
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      total:
+                        type: number
+                      highlights:
+                        type:
+                        - array
+                        - 'null'
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: The URL of the parent note containing this highlight in the Dovetail web app. This field is experimental and may change without notice.
+                            result_type:
+                              type: string
+                              enum:
+                              - HIGHLIGHT
+                            preview_text:
+                              type:
+                              - string
+                              - 'null'
+                            note_id:
+                              type:
+                              - string
+                              - 'null'
+                            note_title:
+                              type:
+                              - string
+                              - 'null'
+                            author_id:
+                              type:
+                              - string
+                              - 'null'
+                            project_id:
+                              type:
+                              - string
+                              - 'null'
+                            project_title:
+                              type:
+                              - string
+                              - 'null'
+                            created_at:
+                              type: string
+                            updated_at:
+                              type: string
+                            tags:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  title:
+                                    type:
+                                    - string
+                                    - 'null'
+                                  highlight_count:
+                                    type:
+                                    - number
+                                    - 'null'
+                                required:
+                                - title
+                                - highlight_count
+                          required:
+                          - id
+                          - result_type
+                          - preview_text
+                          - note_id
+                          - note_title
+                          - author_id
+                          - project_id
+                          - project_title
+                          - created_at
+                          - updated_at
+                          - tags
+                      tags:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            url:
+                              type: string
+                              description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                            result_type:
+                              type: string
+                              enum:
+                              - TAG
+                            author_id:
+                              type:
+                              - string
+                              - 'null'
+                            title:
+                              type: string
+                            color:
+                              type:
+                              - string
+                              - 'null'
+                            highlight_count:
+                              type: number
+                            created_at:
+                              type: string
+                            updated_at:
+                              type: string
+                          required:
+                          - id
+                          - result_type
+                          - author_id
+                          - title
+                          - color
+                          - highlight_count
+                          - created_at
+                          - updated_at
+                      notes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            url:
+                              type: string
+                              description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                            result_type:
+                              type: string
+                              enum:
+                              - NOTE
+                            preview_text:
+                              type:
+                              - string
+                              - 'null'
+                            title:
+                              type: string
+                            author_id:
+                              type:
+                              - string
+                              - 'null'
+                            project_id:
+                              type:
+                              - string
+                              - 'null'
+                            project_title:
+                              type:
+                              - string
+                              - 'null'
+                            created_at:
+                              type: string
+                            updated_at:
+                              type: string
+                            fields:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  label:
+                                    type: string
+                                  value:
+                                    type:
+                                    - string
+                                    - 'null'
+                                required:
+                                - label
+                                - value
+                          required:
+                          - id
+                          - result_type
+                          - preview_text
+                          - title
+                          - author_id
+                          - project_id
+                          - project_title
+                          - created_at
+                          - updated_at
+                          - fields
+                      insights:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            url:
+                              type: string
+                              description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                            result_type:
+                              type: string
+                              enum:
+                              - INSIGHT
+                            preview_text:
+                              type:
+                              - string
+                              - 'null'
+                            title:
+                              type: string
+                            author_id:
+                              type:
+                              - string
+                              - 'null'
+                            project_id:
+                              type:
+                              - string
+                              - 'null'
+                            project_title:
+                              type:
+                              - string
+                              - 'null'
+                            created_at:
+                              type: string
+                            updated_at:
+                              type: string
+                            fields:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  label:
+                                    type: string
+                                  value:
+                                    type:
+                                    - string
+                                    - 'null'
+                                required:
+                                - label
+                                - value
+                          required:
+                          - id
+                          - result_type
+                          - preview_text
+                          - title
+                          - author_id
+                          - project_id
+                          - project_title
+                          - created_at
+                          - updated_at
+                          - fields
+                      channels:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            url:
+                              type: string
+                              description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                            result_type:
+                              type: string
+                              enum:
+                              - CHANNEL
+                            author_id:
+                              type:
+                              - string
+                              - 'null'
+                            title:
+                              type: string
+                            created_at:
+                              type: string
+                            updated_at:
+                              type: string
+                          required:
+                          - id
+                          - result_type
+                          - author_id
+                          - title
+                          - created_at
+                          - updated_at
+                      themes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: The URL of this resource in the Dovetail web app, or null if unavailable. This field is experimental and may change without notice.
+                            result_type:
+                              type: string
+                              enum:
+                              - THEME
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                            summary:
+                              type:
+                              - string
+                              - 'null'
+                            created_at:
+                              type: string
+                            updated_at:
+                              type: string
+                          required:
+                          - id
+                          - result_type
+                          - title
+                          - summary
+                          - created_at
+                          - updated_at
+                      offset:
+                        type: number
+                      limit:
+                        type: number
+                    required:
+                    - total
+                    - highlights
+                    - tags
+                    - notes
+                    - insights
+                    - channels
+                    - themes
+                    - offset
+                    - limit
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - InvalidOperation
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - ValidationError
+                          title:
+                            type: string
+                            enum:
+                            - Contract violation
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                        - message
+                        - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV1Search
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+x-provenance:
+  method: searched
+  source: https://developers.dovetail.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://developers.dovetail.com/reference/delete_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/delete_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/delete_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/delete_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/delete_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/delete_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-data.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-themes.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-data-datum-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels.md
+  - https://developers.dovetail.com/reference/get_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/get_v1-contacts.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/get_v1-data.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs.md
+  - https://developers.dovetail.com/reference/get_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/get_v1-fields.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id-download.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id-contents.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders.md
+  - https://developers.dovetail.com/reference/get_v1-highlights-highlight-id.md
+  - https://developers.dovetail.com/reference/get_v1-highlights.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/get_v1-notes.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id-context.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-projects-templates.md
+  - https://developers.dovetail.com/reference/get_v1-projects.md
+  - https://developers.dovetail.com/reference/get_v1-tags-boards.md
+  - https://developers.dovetail.com/reference/get_v1-tags-tag-id.md
+  - https://developers.dovetail.com/reference/get_v1-tags.md
+  - https://developers.dovetail.com/reference/get_v1-token-info.md
+  - https://developers.dovetail.com/reference/get_v1-users-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-users.md
+  - https://developers.dovetail.com/reference/get_v1-workspace-context.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/patch_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/patch_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/patch_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/patch_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/patch_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/patch_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/post_v1-channels-data.md
+  - https://developers.dovetail.com/reference/post_v1-channels-topic.md
+  - https://developers.dovetail.com/reference/post_v1-channels.md
+  - https://developers.dovetail.com/reference/post_v1-contacts.md
+  - https://developers.dovetail.com/reference/post_v1-data-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-data.md
+  - https://developers.dovetail.com/reference/post_v1-dataset-dataset-id-data.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-docs-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-docs.md
+  - https://developers.dovetail.com/reference/post_v1-fields.md
+  - https://developers.dovetail.com/reference/post_v1-files.md
+  - https://developers.dovetail.com/reference/post_v1-folders.md
+  - https://developers.dovetail.com/reference/post_v1-highlights-highlight-id-tags.md
+  - https://developers.dovetail.com/reference/post_v1-highlights.md
+  - https://developers.dovetail.com/reference/post_v1-insights-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-insights.md
+  - https://developers.dovetail.com/reference/post_v1-notes-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-notes.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-docs.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-workspace-field-groups.md
+  - https://developers.dovetail.com/reference/post_v1-projects.md
+  - https://developers.dovetail.com/reference/post_v1-search.md
+  - https://developers.dovetail.com/reference/post_v1-summarize.md
+  - https://developers.dovetail.com/reference/post_v1-tags.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-audio.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-utterance.md
+  - https://developers.dovetail.com/reference/post_v1-workspace-context-docs.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-large-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-large-upload.md
+  - https://developers.dovetail.com/reference/post_v2-files-upload.md
+  - https://developers.dovetail.com/reference/post_v2-search.md
+  - https://developers.dovetail.com/reference/put_v1-transcripts-data-id.md
+  merge:
+    pages: 111
+    deduped: 110
+    conflicts_kept_first: 0

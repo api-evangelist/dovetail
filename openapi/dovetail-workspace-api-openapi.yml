@@ -1,0 +1,659 @@
+openapi: 3.2.0
+info:
+  title: Dovetail Public Workspace API
+  version: 0.0.1
+  description: The Dovetail Public API provides programmatic access to your Dovetail workspace.
+servers:
+- url: https://dovetail.com/api
+- url: https://dovetailapp.com/api
+security:
+- bearerAuth: []
+tags:
+- name: Workspace
+paths:
+  /v1/workspace/context:
+    get:
+      description: 'Retrieve the AI context for the workspace: linked insight docs used as source material for workspace-wide AI features.'
+      summary: Get workspace context
+      tags:
+      - Workspace
+      parameters: []
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      docs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Unique identifier of the doc.
+                            type:
+                              type: string
+                              enum:
+                              - doc
+                          required:
+                          - id
+                          - type
+                    required:
+                    - docs
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - ValidationError
+                        title:
+                          type: string
+                          enum:
+                          - Contract violation
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                      - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: getV1WorkspaceContext
+      x-operation-id-source: derived
+  /v1/workspace/context/docs:
+    post:
+      description: 'Add an insight to the workspace''s AI context. A workspace can have at most 10 context docs. If the insight is already linked, this is a no-op.
+
+
+        Requires a workspace administrator.
+
+
+        Returns the full updated list of context docs.
+
+
+        > 🚧 Permissions
+
+        >
+
+        > Please check you have the relevant permissions required to access this resource. This may include specific permissions on the object itself or its parent, or having the correct user role if you''re making updates.'
+      summary: Add workspace context doc
+      tags:
+      - Workspace
+      parameters: []
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Unique identifier of the doc to add to the workspace's AI context.
+                  example: 1A2B3C4D5E6F7G8H9I0J1K
+              required:
+              - id
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Unique identifier of the doc.
+                        type:
+                          type: string
+                          enum:
+                          - doc
+                      required:
+                      - id
+                      - type
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - InvalidOperation
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - ValidationError
+                          title:
+                            type: string
+                            enum:
+                            - Contract violation
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                        - message
+                        - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV1WorkspaceContextDocs
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+x-provenance:
+  method: searched
+  source: https://developers.dovetail.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://developers.dovetail.com/reference/delete_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/delete_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/delete_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/delete_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/delete_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/delete_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-data.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-themes.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-data-datum-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels.md
+  - https://developers.dovetail.com/reference/get_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/get_v1-contacts.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/get_v1-data.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs.md
+  - https://developers.dovetail.com/reference/get_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/get_v1-fields.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id-download.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id-contents.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders.md
+  - https://developers.dovetail.com/reference/get_v1-highlights-highlight-id.md
+  - https://developers.dovetail.com/reference/get_v1-highlights.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/get_v1-notes.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id-context.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-projects-templates.md
+  - https://developers.dovetail.com/reference/get_v1-projects.md
+  - https://developers.dovetail.com/reference/get_v1-tags-boards.md
+  - https://developers.dovetail.com/reference/get_v1-tags-tag-id.md
+  - https://developers.dovetail.com/reference/get_v1-tags.md
+  - https://developers.dovetail.com/reference/get_v1-token-info.md
+  - https://developers.dovetail.com/reference/get_v1-users-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-users.md
+  - https://developers.dovetail.com/reference/get_v1-workspace-context.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/patch_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/patch_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/patch_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/patch_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/patch_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/patch_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/post_v1-channels-data.md
+  - https://developers.dovetail.com/reference/post_v1-channels-topic.md
+  - https://developers.dovetail.com/reference/post_v1-channels.md
+  - https://developers.dovetail.com/reference/post_v1-contacts.md
+  - https://developers.dovetail.com/reference/post_v1-data-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-data.md
+  - https://developers.dovetail.com/reference/post_v1-dataset-dataset-id-data.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-docs-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-docs.md
+  - https://developers.dovetail.com/reference/post_v1-fields.md
+  - https://developers.dovetail.com/reference/post_v1-files.md
+  - https://developers.dovetail.com/reference/post_v1-folders.md
+  - https://developers.dovetail.com/reference/post_v1-highlights-highlight-id-tags.md
+  - https://developers.dovetail.com/reference/post_v1-highlights.md
+  - https://developers.dovetail.com/reference/post_v1-insights-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-insights.md
+  - https://developers.dovetail.com/reference/post_v1-notes-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-notes.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-docs.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-workspace-field-groups.md
+  - https://developers.dovetail.com/reference/post_v1-projects.md
+  - https://developers.dovetail.com/reference/post_v1-search.md
+  - https://developers.dovetail.com/reference/post_v1-summarize.md
+  - https://developers.dovetail.com/reference/post_v1-tags.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-audio.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-utterance.md
+  - https://developers.dovetail.com/reference/post_v1-workspace-context-docs.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-large-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-large-upload.md
+  - https://developers.dovetail.com/reference/post_v2-files-upload.md
+  - https://developers.dovetail.com/reference/post_v2-search.md
+  - https://developers.dovetail.com/reference/put_v1-transcripts-data-id.md
+  merge:
+    pages: 111
+    deduped: 110
+    conflicts_kept_first: 0

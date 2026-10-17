@@ -171,25 +171,16 @@ common:
   url: security/dovetail-domain-security.yml
 
 apis:
-- name: Dovetail API
-  description: 'Dovetail Public API for building custom integrations against a Dovetail workspace: manage projects, folders, docs, insights, data
-    (notes), highlights, tags, themes, channels, topics, contacts, users, custom fields, files, comments and transcripts; run Magic Search, Search
-    V2 and Magic Summarize. Bearer API-token auth; cursor-based pagination; 200 requests/minute per workspace.'
+- aid: dovetail:dovetail-authentication-api
+  name: Dovetail Authentication API
+  description: The Authentication API from Dovetail — 1 operation(s) for authentication.
   humanURL: https://developers.dovetail.com/
   baseURL: https://dovetail.com/api/v1/
   tags:
-  - Customer Research
-  - Insights
-  - Search
-  - Artificial Intelligence
-  tags_raw:
-  - Customer Research
-  - Insights
-  - Search
-  - AI
+  - Authentication
   properties:
-  - url: openapi/dovetail-public-api-openapi.yml
-    type: OpenAPI
+  - type: OpenAPI
+    url: openapi/dovetail-authentication-api-openapi.yml
   - type: Documentation
     url: https://developers.dovetail.com/docs/introduction
   - type: APIReference
@@ -208,12 +199,668 @@ apis:
     url: data-model/dovetail-data-model.yml
   - type: Lifecycle
     url: lifecycle/dovetail-lifecycle.yml
-  - type: MCPServer
-    url: mcp/dovetail-mcp.yml
   - type: LLMsTxt
     url: llms/dovetail-llms.txt
-  aid: dovetail:dovetail-api
-
+- aid: dovetail:dovetail-channels-api
+  name: Dovetail Channels API
+  description: The Channels API from Dovetail — 8 operation(s) for channels.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Channels
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-channels-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-contacts-api
+  name: Dovetail Contacts API
+  description: The Contacts API from Dovetail — 2 operation(s) for contacts.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Contacts
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-contacts-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-data-api
+  name: Dovetail Data API
+  description: The Data API from Dovetail — 4 operation(s) for data.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Data
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-data-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-datasets-api
+  name: Dovetail Datasets API
+  description: The Datasets API from Dovetail — 1 operation(s) for datasets.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Datasets
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-datasets-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-doccomments-api
+  name: Dovetail Doc Comments API
+  description: The DocComments API from Dovetail — 4 operation(s) for doccomments.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - DocComments
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-doccomments-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-docs-api
+  name: Dovetail Docs API
+  description: The Docs API from Dovetail — 5 operation(s) for docs.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Docs
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-docs-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-fields-api
+  name: Dovetail Fields API
+  description: The Fields API from Dovetail — 2 operation(s) for fields.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Fields
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-fields-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-files-api
+  name: Dovetail Files API
+  description: The Files API from Dovetail — 3 operation(s) for files.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Files
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-files-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-filesv2-api
+  name: Dovetail Files V2 API
+  description: The FilesV2 API from Dovetail — 4 operation(s) for filesv2.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - FilesV2
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-filesv2-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-folders-api
+  name: Dovetail Folders API
+  description: The Folders API from Dovetail — 3 operation(s) for folders.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Folders
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-folders-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-highlights-api
+  name: Dovetail Highlights API
+  description: The Highlights API from Dovetail — 3 operation(s) for highlights.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Highlights
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-highlights-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-insightcomments-api
+  name: Dovetail Insight Comments API
+  description: The InsightComments API from Dovetail — 4 operation(s) for insightcomments.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - InsightComments
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-insightcomments-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-insights-api
+  name: Dovetail Insights API
+  description: The Insights API from Dovetail — 5 operation(s) for insights.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Insights
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-insights-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-notes-api
+  name: Dovetail Notes API
+  description: The Notes API from Dovetail — 4 operation(s) for notes.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Notes
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-notes-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-projects-api
+  name: Dovetail Projects API
+  description: The Projects API from Dovetail — 8 operation(s) for projects.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Projects
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-projects-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-search-api
+  name: Dovetail Search API
+  description: The Search API from Dovetail — 1 operation(s) for search.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Search
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-search-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-searchv2-api
+  name: Dovetail Search V2 API
+  description: The SearchV2 API from Dovetail — 1 operation(s) for searchv2.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - SearchV2
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-searchv2-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-summarize-api
+  name: Dovetail Summarize API
+  description: The Summarize API from Dovetail — 1 operation(s) for summarize.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Summarize
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-summarize-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-tags-api
+  name: Dovetail Tags API
+  description: The Tags API from Dovetail — 3 operation(s) for tags.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Tags
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-tags-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-transcripts-api
+  name: Dovetail Transcripts API
+  description: The Transcripts API from Dovetail — 3 operation(s) for transcripts.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Transcripts
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-transcripts-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-users-api
+  name: Dovetail Users API
+  description: The Users API from Dovetail — 2 operation(s) for users.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Users
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-users-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
+- aid: dovetail:dovetail-workspace-api
+  name: Dovetail Workspace API
+  description: The Workspace API from Dovetail — 2 operation(s) for workspace.
+  humanURL: https://developers.dovetail.com/
+  baseURL: https://dovetail.com/api/v1/
+  tags:
+  - Workspace
+  properties:
+  - type: OpenAPI
+    url: openapi/dovetail-workspace-api-openapi.yml
+  - type: Documentation
+    url: https://developers.dovetail.com/docs/introduction
+  - type: APIReference
+    url: https://developers.dovetail.com/reference
+  - type: GettingStarted
+    url: https://developers.dovetail.com/docs/introduction
+  - type: Authentication
+    url: authentication/dovetail-authentication.yml
+  - type: RateLimits
+    url: rate-limits/dovetail-rate-limits.yml
+  - type: Conventions
+    url: conventions/dovetail-conventions.yml
+  - type: ErrorCatalog
+    url: errors/dovetail-problem-types.yml
+  - type: DataModel
+    url: data-model/dovetail-data-model.yml
+  - type: Lifecycle
+    url: lifecycle/dovetail-lifecycle.yml
+  - type: LLMsTxt
+    url: llms/dovetail-llms.txt
 x-enrichment:
   date: '2026-07-19'
   status: backfilled

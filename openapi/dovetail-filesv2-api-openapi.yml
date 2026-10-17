@@ -1,0 +1,1477 @@
+openapi: 3.2.0
+info:
+  title: Dovetail Public Files V2 API
+  version: 0.0.1
+  description: The Dovetail Public API provides programmatic access to your Dovetail workspace.
+servers:
+- url: https://dovetail.com/api
+- url: https://dovetailapp.com/api
+security:
+- bearerAuth: []
+tags:
+- name: FilesV2
+paths:
+  /v2/files/large-upload:
+    post:
+      description: 'Initiate a multipart upload for files **up to 10 GB**. The response includes an opaque `upload_id` and a fully populated `urls` array containing one pre-signed `PUT` URL per part the client should upload. After uploading every part, call **Complete large upload** at `POST /v2/files/{file_id}/large-upload/complete` with the resulting part `etag` values.
+
+
+        The client may optionally specify the desired number of `parts` (1 to 10000). If omitted, the server picks a value based on the declared `size` and the recommended part size — for most uploads this is the right default.
+
+
+        Every URL in `urls` expires roughly **3 hours** after issue. If a part `PUT` fails after that window, abandon the upload and initiate a fresh session.
+
+
+        Once finalized, inspect the file with `GET /v1/files/{file_id}` and download it with `GET /v1/files/{file_id}/download` — no v2 read surface exists yet.
+
+
+        Returns `201` with the upload session details. Orphaned uploads that are not completed are eventually cleaned up.'
+      summary: Initiate a large (multipart) file upload
+      tags:
+      - FilesV2
+      parameters: []
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 1024
+                  description: The file's original name, including extension. 1-1024 characters.
+                type:
+                  type: string
+                  maxLength: 255
+                  description: The file's MIME type (e.g. `image/png`, `video/mp4`). Up to 255 characters.
+                size:
+                  type: integer
+                  minimum: 1
+                  maximum: 10000000000
+                  description: Total size of the file in bytes. Must be between 1 and 10000000000 (10 GB).
+                parts:
+                  type: integer
+                  minimum: 1
+                  maximum: 10000
+                  description: Number of parts the client will split the upload into. Optional — if omitted, the server picks a value based on the declared `size` and the recommended part size. Must be between 1 and 10000.
+              required:
+              - name
+              - type
+              - size
+      responses:
+        '201':
+          description: '201'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      file_id:
+                        type: string
+                        description: Base62-encoded UUID identifying the newly created file record.
+                      upload_id:
+                        type: string
+                        description: Opaque identifier for the multipart upload. Pass this back to the large-upload complete endpoint.
+                      urls:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            part_number:
+                              type: integer
+                              minimum: 1
+                              maximum: 10000
+                              description: 1-indexed part number this URL corresponds to.
+                            url:
+                              type: string
+                              format: uri
+                              description: Pre-signed URL the client should `PUT` the part body to.
+                            expires_at:
+                              type: string
+                              description: ISO 8601 timestamp at which this part URL expires.
+                          required:
+                          - part_number
+                          - url
+                          - expires_at
+                        minItems: 1
+                        maxItems: 10000
+                        description: Signed `PUT` URLs for every part of the upload, ordered by `part_number` ascending. The array length equals the number of parts the server allocated for this session.
+                      part_size_recommendation:
+                        type: object
+                        properties:
+                          min:
+                            type: number
+                            enum:
+                            - 5242880
+                            description: Minimum part size (bytes). All parts except the last must be at least this size.
+                          recommended:
+                            type: number
+                            enum:
+                            - 26214400
+                            description: Recommended part size (bytes). Balances throughput and request overhead.
+                          max:
+                            type: number
+                            enum:
+                            - 5368709120
+                            description: Maximum part size (bytes). No single part may exceed this value.
+                        required:
+                        - min
+                        - recommended
+                        - max
+                        description: Server-recommended part-size bounds for the multipart upload.
+                      max_parts:
+                        type: number
+                        enum:
+                        - 10000
+                        description: Maximum number of parts a large upload may use.
+                      max_file_size_bytes:
+                        type: number
+                        enum:
+                        - 10000000000
+                        description: Maximum size (bytes) accepted by this endpoint.
+                    required:
+                    - file_id
+                    - upload_id
+                    - urls
+                    - part_size_recommendation
+                    - max_parts
+                    - max_file_size_bytes
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InvalidOperation
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV2FilesLargeUpload
+      x-operation-id-source: derived
+  /v2/files/upload:
+    post:
+      description: 'Initiate a single-PUT upload for files **up to 5 GB**. The response includes a pre-signed `upload_url` that the client should `PUT` the full file body to. After the `PUT` succeeds, call **Complete upload** at `POST /v2/files/{file_id}/upload/complete`.
+
+
+        The pre-signed `upload_url` is signed for server-side encryption with AWS KMS, so the `PUT` request **must** include the header `x-amz-server-side-encryption: aws:kms`. Omitting it (or sending a different value) fails the request with a signature mismatch (HTTP `403`).
+
+
+        ```bash
+
+        curl -X PUT "" \
+
+        -H "x-amz-server-side-encryption: aws:kms" \
+
+        -H "Content-Type: " \
+
+        --data-binary @/path/to/file
+
+        ```
+
+
+        Files larger than 5 GB must use the large-upload endpoint (`POST /v2/files/large-upload`) instead.
+
+
+        Once finalized, inspect the file with `GET /v1/files/{file_id}` and download it with `GET /v1/files/{file_id}/download` — no v2 read surface exists yet.
+
+
+        Returns `201` with the upload session details. Orphaned uploads that are not completed are eventually cleaned up.'
+      summary: Initiate a single-PUT file upload
+      tags:
+      - FilesV2
+      parameters: []
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 1024
+                  description: The file's original name, including extension. 1-1024 characters.
+                type:
+                  type: string
+                  maxLength: 255
+                  description: The file's MIME type (e.g. `image/png`, `video/mp4`). Up to 255 characters.
+                size:
+                  type: integer
+                  minimum: 1
+                  maximum: 5000000000
+                  description: Total size of the file in bytes. Must be between 1 and 5000000000 (5 GB). For files larger than 5 GB use the large-upload endpoint instead.
+              required:
+              - name
+              - type
+              - size
+      responses:
+        '201':
+          description: '201'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      file_id:
+                        type: string
+                        description: Base62-encoded UUID identifying the newly created file record.
+                      upload_url:
+                        type: string
+                        format: uri
+                        description: Pre-signed URL the client should `PUT` the file body to.
+                      expires_at:
+                        type: string
+                        description: ISO 8601 timestamp at which `upload_url` expires.
+                      max_file_size_bytes:
+                        type: number
+                        enum:
+                        - 5000000000
+                        description: Maximum size (bytes) accepted by this endpoint.
+                    required:
+                    - file_id
+                    - upload_url
+                    - expires_at
+                    - max_file_size_bytes
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InvalidOperation
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV2FilesUpload
+      x-operation-id-source: derived
+  /v2/files/{file_id}/large-upload/complete:
+    post:
+      description: 'Finalize an upload session created by **Initiate large upload** (`POST /v2/files/large-upload`). The `parts` array must include every part that was uploaded, with the `etag` returned by the storage backend for each part `PUT`.
+
+
+        On success the file is marked as uploaded and returned in the response. The file''s processing `status` may still be `pending` while downstream processing runs. A `502` response indicates the storage backend rejected the finalization (for example, a part `etag` mismatch) — the client may retry.
+
+
+        Idempotent for already-DONE files: a retry of a previously-successful complete call (or a complete call arriving after the auto-finalize backstop has already finalised the row) returns `200` with the file metadata instead of `409`. `FAILED` / `CANCELLED` still return `409`.
+
+
+        To cancel an in-progress upload, simply stop calling the API: abandoned file records are garbage-collected after 24 hours, and any incomplete S3 multipart parts are reaped by an S3 bucket lifecycle rule.'
+      summary: Finalize a large (multipart) file upload
+      tags:
+      - FilesV2
+      parameters:
+      - name: file_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: File id
+        description: Unique identifier of the file.
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                upload_id:
+                  type: string
+                  minLength: 1
+                  description: Multipart `upload_id` returned by the large-upload initiate endpoint.
+                parts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      part_number:
+                        type: integer
+                        minimum: 1
+                        maximum: 10000
+                        description: 1-indexed part number that was uploaded.
+                      etag:
+                        type: string
+                        minLength: 1
+                        description: ETag returned by the storage backend when the part was uploaded.
+                    required:
+                    - part_number
+                    - etag
+                  minItems: 1
+                  maxItems: 10000
+                  description: All uploaded parts, with their `part_number` and `etag`. Must include every part that was uploaded.
+              required:
+              - upload_id
+              - parts
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique identifier of the file.
+                      name:
+                        type: string
+                        description: The file's original name.
+                      type:
+                        type:
+                        - string
+                        - 'null'
+                        description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                      size:
+                        type:
+                        - number
+                        - 'null'
+                        description: Size of the file in bytes. Null if unknown.
+                      status:
+                        type: string
+                        enum:
+                        - completed
+                        - pending
+                        - failed
+                        description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                      author:
+                        oneOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                          required:
+                          - id
+                        - type:
+                          - string
+                          - 'null'
+                          format: 'null'
+                        description: The user who uploaded the file, or null if the author is unknown.
+                      created_at:
+                        oneOf:
+                        - type: string
+                        - type:
+                          - string
+                          - 'null'
+                          format: 'null'
+                        description: ISO 8601 timestamp when the file was created.
+                      url:
+                        type:
+                        - string
+                        - 'null'
+                        description: Permanent URL pointing at the **Download a file** endpoint. Safe to cache and store — the URL itself never expires, but calling it requires the same authentication as other API endpoints and returns a short-lived presigned URL each time. The endpoint performs its own readiness and access checks.
+                    required:
+                    - id
+                    - name
+                    - type
+                    - size
+                    - status
+                    - author
+                    - created_at
+                    - url
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InvalidOperation
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '409':
+          description: '409'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InvalidOperation
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '502':
+          description: '502'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV2FilesByFileIdLargeUploadComplete
+      x-operation-id-source: derived
+  /v2/files/{file_id}/upload/complete:
+    post:
+      description: 'Finalize an upload session created by **Initiate single-PUT upload** (`POST /v2/files/upload`). The server `HEAD`s the S3 object to confirm bytes are present and that the size matches the declared value, then flips the file row to `DONE`.
+
+
+        On success the file is marked as uploaded and returned in the response. The file''s processing `status` may still be `pending` while downstream processing runs.
+
+
+        Idempotent for already-DONE files: a retry of a previously-successful complete call (or a complete call arriving after the auto-finalize backstop has already finalised the row) returns `200` with the file metadata instead of `409`. `FAILED` / `CANCELLED` still return `409`.
+
+
+        To cancel an in-progress upload, simply stop calling the API: abandoned file records are garbage-collected after 24 hours.'
+      summary: Finalize a single-PUT file upload
+      tags:
+      - FilesV2
+      parameters:
+      - name: file_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: File id
+        description: Unique identifier of the file.
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              description: Finalize a single-PUT upload. The endpoint takes no body parameters.
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique identifier of the file.
+                      name:
+                        type: string
+                        description: The file's original name.
+                      type:
+                        type:
+                        - string
+                        - 'null'
+                        description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                      size:
+                        type:
+                        - number
+                        - 'null'
+                        description: Size of the file in bytes. Null if unknown.
+                      status:
+                        type: string
+                        enum:
+                        - completed
+                        - pending
+                        - failed
+                        description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                      author:
+                        oneOf:
+                        - type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                          required:
+                          - id
+                        - type:
+                          - string
+                          - 'null'
+                          format: 'null'
+                        description: The user who uploaded the file, or null if the author is unknown.
+                      created_at:
+                        oneOf:
+                        - type: string
+                        - type:
+                          - string
+                          - 'null'
+                          format: 'null'
+                        description: ISO 8601 timestamp when the file was created.
+                      url:
+                        type:
+                        - string
+                        - 'null'
+                        description: Permanent URL pointing at the **Download a file** endpoint. Safe to cache and store — the URL itself never expires, but calling it requires the same authentication as other API endpoints and returns a short-lived presigned URL each time. The endpoint performs its own readiness and access checks.
+                    required:
+                    - id
+                    - name
+                    - type
+                    - size
+                    - status
+                    - author
+                    - created_at
+                    - url
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InvalidOperation
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '409':
+          description: '409'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InvalidOperation
+                        title:
+                          type: string
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV2FilesByFileIdUploadComplete
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+x-provenance:
+  method: searched
+  source: https://developers.dovetail.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://developers.dovetail.com/reference/delete_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/delete_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/delete_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/delete_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/delete_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/delete_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-data.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-themes.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-data-datum-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels.md
+  - https://developers.dovetail.com/reference/get_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/get_v1-contacts.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/get_v1-data.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs.md
+  - https://developers.dovetail.com/reference/get_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/get_v1-fields.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id-download.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id-contents.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders.md
+  - https://developers.dovetail.com/reference/get_v1-highlights-highlight-id.md
+  - https://developers.dovetail.com/reference/get_v1-highlights.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/get_v1-notes.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id-context.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-projects-templates.md
+  - https://developers.dovetail.com/reference/get_v1-projects.md
+  - https://developers.dovetail.com/reference/get_v1-tags-boards.md
+  - https://developers.dovetail.com/reference/get_v1-tags-tag-id.md
+  - https://developers.dovetail.com/reference/get_v1-tags.md
+  - https://developers.dovetail.com/reference/get_v1-token-info.md
+  - https://developers.dovetail.com/reference/get_v1-users-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-users.md
+  - https://developers.dovetail.com/reference/get_v1-workspace-context.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/patch_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/patch_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/patch_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/patch_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/patch_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/patch_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/post_v1-channels-data.md
+  - https://developers.dovetail.com/reference/post_v1-channels-topic.md
+  - https://developers.dovetail.com/reference/post_v1-channels.md
+  - https://developers.dovetail.com/reference/post_v1-contacts.md
+  - https://developers.dovetail.com/reference/post_v1-data-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-data.md
+  - https://developers.dovetail.com/reference/post_v1-dataset-dataset-id-data.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-docs-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-docs.md
+  - https://developers.dovetail.com/reference/post_v1-fields.md
+  - https://developers.dovetail.com/reference/post_v1-files.md
+  - https://developers.dovetail.com/reference/post_v1-folders.md
+  - https://developers.dovetail.com/reference/post_v1-highlights-highlight-id-tags.md
+  - https://developers.dovetail.com/reference/post_v1-highlights.md
+  - https://developers.dovetail.com/reference/post_v1-insights-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-insights.md
+  - https://developers.dovetail.com/reference/post_v1-notes-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-notes.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-docs.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-workspace-field-groups.md
+  - https://developers.dovetail.com/reference/post_v1-projects.md
+  - https://developers.dovetail.com/reference/post_v1-search.md
+  - https://developers.dovetail.com/reference/post_v1-summarize.md
+  - https://developers.dovetail.com/reference/post_v1-tags.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-audio.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-utterance.md
+  - https://developers.dovetail.com/reference/post_v1-workspace-context-docs.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-large-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-large-upload.md
+  - https://developers.dovetail.com/reference/post_v2-files-upload.md
+  - https://developers.dovetail.com/reference/post_v2-search.md
+  - https://developers.dovetail.com/reference/put_v1-transcripts-data-id.md
+  merge:
+    pages: 111
+    deduped: 110
+    conflicts_kept_first: 0

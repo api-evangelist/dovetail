@@ -1,0 +1,3743 @@
+openapi: 3.2.0
+info:
+  title: Dovetail Public Insights API
+  version: 0.0.1
+  description: The Dovetail Public API provides programmatic access to your Dovetail workspace.
+servers:
+- url: https://dovetail.com/api
+- url: https://dovetailapp.com/api
+security:
+- bearerAuth: []
+tags:
+- name: Insights
+paths:
+  /v1/insights:
+    get:
+      description: 'Retrieve all insights in your workspace. Insights are polished research deliverables — written reports that synthesize findings from data entries, highlights, and other sources into actionable recommendations. They can be shared with stakeholders.
+
+
+        **Note:** The insights resource is deprecated. New integrations should use **docs** (`/v1/docs`) instead, which provide the same functionality. Existing insight endpoints continue to work but responses include a `Deprecation` header.
+
+
+        Results can be filtered by folder, project, title, or creation date. They can be sorted by creation date or title and are paginated.'
+      summary: List insights
+      deprecated: true
+      tags:
+      - Insights
+      parameters:
+      - name: page
+        in: query
+        description: See [Pagination](https://developers.dovetail.com/docs/pagination) for details about how to use a cursor to iterate through the list.
+        style: deepObject
+        schema:
+          default:
+            limit: 100
+          type: object
+          properties:
+            start_cursor:
+              type: string
+            limit:
+              default: 100
+              type:
+              - integer
+              - 'null'
+              minimum: 0
+              maximum: 100
+      - name: filter
+        in: query
+        description: See [Filters](https://developers.dovetail.com/docs/filters) for details on parameter formatting.
+        style: deepObject
+        schema:
+          type: object
+          properties:
+            created_at:
+              type: object
+              properties:
+                gt:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: Great than operator
+                gte:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: Great than or equal to operator
+                lt:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: Less than operator
+                lte:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: Less than or equal operator
+              description: Filter results based on dates. When passing in operators, the operator pairs are mutually exclusive. For example, you cannot send both `gt` and `gte` in the same request.
+            folder_id:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+              description: Unique identifier(s) of the associated folder(s)
+            project_id:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+              description: Unique identifier(s) of the associated project(s)
+            title:
+              type: object
+              properties:
+                contains:
+                  type: string
+                  description: Substring (case-insensitive) to search for within the target string
+                equal_to:
+                  type: string
+                  description: Equal to operator
+              description: Filter results based on string value. You can either provide a `contains` operator for substring matching or an `equal_to` operator for exact matching. These options are mutually exclusive.
+          additionalProperties: false
+      - name: sort
+        in: query
+        description: See [Sort](https://developers.dovetail.com/docs/sort) for details on the sort parameter.
+        schema:
+          default: created_at:desc
+          oneOf:
+          - type: string
+            enum:
+            - created_at:asc
+            - created_at:desc
+            - title:asc
+            - title:desc
+          - type: array
+            items:
+              type: string
+              enum:
+              - created_at:asc
+              - created_at:desc
+              - title:asc
+              - title:desc
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        url:
+                          type: string
+                          description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                        title:
+                          type: string
+                        type:
+                          type: string
+                          enum:
+                          - insight
+                        created_at:
+                          type: string
+                        folder:
+                          type:
+                          - object
+                          - 'null'
+                          properties:
+                            id:
+                              type: string
+                          required:
+                          - id
+                      required:
+                      - id
+                      - title
+                      - type
+                      - created_at
+                      - folder
+                  page:
+                    type: object
+                    properties:
+                      total_count:
+                        type: number
+                        description: Total number of items matching the query.
+                      has_more:
+                        type: boolean
+                        description: Whether there are more items beyond the current page.
+                      next_cursor:
+                        type:
+                        - string
+                        - 'null'
+                        description: Cursor to pass as `page[start_cursor]` to fetch the next page. Null when there are no more results.
+                    required:
+                    - total_count
+                    - has_more
+                    - next_cursor
+                required:
+                - data
+                - page
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - ValidationError
+                        title:
+                          type: string
+                          enum:
+                          - Contract violation
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                      - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: getV1Insights
+      x-operation-id-source: derived
+    post:
+      description: 'Create a new insight in your Dovetail workspace. Insights are polished research deliverables for sharing findings with stakeholders.
+
+
+        **Note:** This endpoint is deprecated. Use **Create doc** (`POST /v1/docs`) instead.
+
+
+        You can provide the initial content as HTML, Markdown, or plain text via the `content` and `content_type` fields. An insight can be placed inside a project (via `project_id`) or a folder (via `folder_id`), but not both.
+
+
+        HTML content may include inline Dovetail nodes using the `data-dovetail-type` attribute — see the mention shape below for an example.
+
+
+        Returns the insight object without the content body.
+
+
+        **Inline mentions**: to reference a Dovetail user, include a span with `data-dovetail-type="mn"` and `data-dovetail-attrs=''{"id":""}''`. The span''s inner text is used as the fallback label if the user cannot be resolved. When the id resolves to a live workspace user, the span is replaced with a live mention node on import. Unresolved ids degrade gracefully to plain text — the import does not fail.
+
+
+        > 🚧 Permissions
+
+        >
+
+        > Please check you have the relevant permissions required to access this resource. This may include specific permissions on the object itself or its parent, or having the correct user role if you''re making updates.'
+      summary: Create insight
+      deprecated: true
+      tags:
+      - Insights
+      parameters: []
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                  description: The insight's title.
+                  example: My First Insight
+                fields:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                        description: The field's label (name). Must match an existing field label when updating, or will create a new field when creating.
+                      value:
+                        oneOf:
+                        - type: string
+                        - type: boolean
+                        - type: number
+                        - type: array
+                          items:
+                            type: string
+                        description: 'The field''s value. Type depends on the field type: string for TEXT/EMAIL/URL/PHONE, boolean for BOOLEAN, number for NUMBER/NPS, string (ISO 8601) for DATETIME, string array for SELECT, or string (contact name) for PERSON. Null to clear the value.'
+                      type:
+                        type: string
+                        enum:
+                        - BOOLEAN
+                        - DATETIME
+                        - EMAIL
+                        - NPS
+                        - NUMBER
+                        - PERSON
+                        - PHONE
+                        - SELECT
+                        - TEXT
+                        - URL
+                        description: Include the desired type when creating a new field. If omitted or left empty, the field type defaults to TEXT. Do not include this property when referencing an existing field.
+                    required:
+                    - label
+                    - value
+                  description: The insight's fields.
+                content:
+                  type: string
+                  maxLength: 100000
+                  description: The initial content of the insight. Interpreted according to the content_type field (defaults to HTML).
+                  example: This is my new insight from the key learnings of the interview.
+                content_type:
+                  default: html
+                  type: string
+                  enum:
+                  - html
+                  - markdown
+                  - text
+                  description: The format of the content field. Defaults to "html". Use "markdown" for Markdown-formatted content (supports headings, lists, bold, italic, code blocks, tables, task lists, links, and blockquotes). Use "text" for plain text.
+                project_id:
+                  type:
+                  - string
+                  - 'null'
+                  description: Unique identifier of the project that the insight is associated with. Cannot be used together with folder_id.
+                folder_id:
+                  type:
+                  - string
+                  - 'null'
+                  description: Unique identifier of the folder to place the insight in. Cannot be used together with project_id. Cannot be combined with fields in the same request.
+                author_id:
+                  type: string
+                  description: Unique identifier of the user to set as the author. Only workspace admins can use this field. If omitted, defaults to the authenticated user. Can only be set at creation time. When an admin sets this field, the author change is recorded in workspace audit logs with the API user as the actor, so overrides remain traceable.
+                cover_image_file_id:
+                  type:
+                  - string
+                  - 'null'
+                  description: Unique identifier of a file to use as the insight's cover image.
+                created_at:
+                  type: string
+                  description: ISO 8601 datetime to set as the insight's creation date. Only workspace admins can use this field. If omitted, defaults to the current time. Can only be set at creation time.
+                  example: '2024-01-15T10:30:00Z'
+                  format: date-time
+      responses:
+        '201':
+          description: '201'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                        description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                      title:
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                        - insight
+                      fields:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            label:
+                              type: string
+                              description: The field's label (name). Must match an existing field label when updating, or will create a new field when creating.
+                            value:
+                              oneOf:
+                              - type: string
+                              - type: boolean
+                              - type: number
+                              - type: array
+                                items:
+                                  type: string
+                              description: 'The field''s value. Type depends on the field type: string for TEXT/EMAIL/URL/PHONE, boolean for BOOLEAN, number for NUMBER/NPS, string (ISO 8601) for DATETIME, string array for SELECT, or string (contact name) for PERSON. Null to clear the value.'
+                            type:
+                              type: string
+                              enum:
+                              - BOOLEAN
+                              - DATETIME
+                              - EMAIL
+                              - NPS
+                              - NUMBER
+                              - PERSON
+                              - PHONE
+                              - SELECT
+                              - TEXT
+                              - URL
+                              description: Include the desired type when creating a new field. If omitted or left empty, the field type defaults to TEXT. Do not include this property when referencing an existing field.
+                          required:
+                          - label
+                          - value
+                      created_at:
+                        type: string
+                      deleted:
+                        type: boolean
+                      project:
+                        type: object
+                        properties:
+                          id:
+                            type:
+                            - string
+                            - 'null'
+                        required:
+                        - id
+                      folder:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                        required:
+                        - id
+                      files:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Unique identifier of the file.
+                            name:
+                              type: string
+                              description: The file's original name.
+                            type:
+                              type:
+                              - string
+                              - 'null'
+                              description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                            size:
+                              type:
+                              - number
+                              - 'null'
+                              description: Size of the file in bytes. Null if unknown.
+                            status:
+                              type: string
+                              enum:
+                              - completed
+                              - pending
+                              - failed
+                              description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                            author:
+                              oneOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  name:
+                                    type: string
+                                required:
+                                - id
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: The user who uploaded the file, or null if the author is unknown.
+                            created_at:
+                              oneOf:
+                              - type: string
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: ISO 8601 timestamp when the file was created.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Permanent URL pointing at the **Download a file** endpoint. Safe to cache and store — the URL itself never expires, but calling it requires the same authentication as other API endpoints and returns a short-lived presigned URL each time. The endpoint performs its own readiness and access checks.
+                          required:
+                          - id
+                          - name
+                          - type
+                          - size
+                          - status
+                          - author
+                          - created_at
+                          - url
+                      cover_image:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            description: Unique identifier of the file.
+                          name:
+                            type: string
+                            description: The file's original name.
+                          type:
+                            type:
+                            - string
+                            - 'null'
+                            description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                          size:
+                            type:
+                            - number
+                            - 'null'
+                            description: Size of the file in bytes. Null if unknown.
+                          status:
+                            type: string
+                            enum:
+                            - completed
+                            - pending
+                            - failed
+                            description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                          author:
+                            oneOf:
+                            - type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                              - id
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: The user who uploaded the file, or null if the author is unknown.
+                          created_at:
+                            oneOf:
+                            - type: string
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: ISO 8601 timestamp when the file was created.
+                          url:
+                            type:
+                            - string
+                            - 'null'
+                            description: URL to download the cover image. Only available when the file has been fully processed.
+                        required:
+                        - id
+                        - name
+                        - type
+                        - size
+                        - status
+                        - author
+                        - created_at
+                        - url
+                    required:
+                    - id
+                    - title
+                    - type
+                    - fields
+                    - created_at
+                    - deleted
+                    - project
+                    - folder
+                    - files
+                    - cover_image
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - InvalidOperation
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - ValidationError
+                          title:
+                            type: string
+                            enum:
+                            - Contract violation
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                        - message
+                        - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV1Insights
+      x-operation-id-source: derived
+  /v1/insights/import/file:
+    post:
+      description: 'Create a new insight by importing a file from a publicly accessible URL. Supported file types include documents (PDF, DOCX), audio files (MP3, WAV, M4A), and video files (MP4, MOV).
+
+
+        **Note:** This endpoint is deprecated. Use **Import file to doc** (`POST /v1/docs/import/file`) instead.
+
+
+        If the imported file is audio or video, Dovetail will automatically queue it for transcription. The resulting transcript will be added to the insight body once processing completes.
+
+
+        The insight can be placed inside a project (via `project_id`) or a folder (via `folder_id`), but not both.
+
+
+        Returns the newly created insight object (without content).
+
+
+        > 🚧 Permissions
+
+        >
+
+        > Please check you have the relevant permissions required to access this resource. This may include specific permissions on the object itself or its parent, or having the correct user role if you''re making updates.
+
+
+        > 🚧 Supported URLs
+
+        >
+
+        > The URL must use HTTPS and resolve to a public address; Dovetail rejects URLs that point to private, loopback, or link-local addresses. Only URLs that link directly to a downloadable file are supported. If the URL does not include a file extension, you must provide the `mime_type` parameter so Dovetail can determine how to process the file.
+
+
+        > 📘 Transcription notifications
+
+        >
+
+        > When a transcription completes or fails, the account linked to the API token will receive a notification. You can manage notification preferences in notification settings.'
+      summary: Import file to insight
+      deprecated: true
+      tags:
+      - Insights
+      parameters: []
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fields:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                        description: The field's label (name). Must match an existing field label when updating, or will create a new field when creating.
+                      value:
+                        oneOf:
+                        - type: string
+                        - type: boolean
+                        - type: number
+                        - type: array
+                          items:
+                            type: string
+                        description: 'The field''s value. Type depends on the field type: string for TEXT/EMAIL/URL/PHONE, boolean for BOOLEAN, number for NUMBER/NPS, string (ISO 8601) for DATETIME, string array for SELECT, or string (contact name) for PERSON. Null to clear the value.'
+                      type:
+                        type: string
+                        enum:
+                        - BOOLEAN
+                        - DATETIME
+                        - EMAIL
+                        - NPS
+                        - NUMBER
+                        - PERSON
+                        - PHONE
+                        - SELECT
+                        - TEXT
+                        - URL
+                        description: Include the desired type when creating a new field. If omitted or left empty, the field type defaults to TEXT. Do not include this property when referencing an existing field.
+                    required:
+                    - label
+                    - value
+                  description: The insight's fields.
+                mime_type:
+                  type: string
+                  description: The nature and format of file want to import.
+                project_id:
+                  type:
+                  - string
+                  - 'null'
+                  description: Unique identifier of the project that the insight is associated with. Cannot be used together with folder_id.
+                folder_id:
+                  type:
+                  - string
+                  - 'null'
+                  description: Unique identifier of the folder to place the insight in. Cannot be used together with project_id. Cannot be combined with fields in the same request.
+                author_id:
+                  type: string
+                  description: Unique identifier of the user to set as the author. Only workspace admins can use this field. If omitted, defaults to the authenticated user. Can only be set at creation time. When an admin sets this field, the author change is recorded in workspace audit logs with the API user as the actor, so overrides remain traceable.
+                title:
+                  type: string
+                  description: The insight's title.
+                  example: My insight
+                url:
+                  type: string
+                  format: uri
+                  description: Publicly accessible HTTPS url of the file that you want to import.
+                cover_image_file_id:
+                  type:
+                  - string
+                  - 'null'
+                  description: Unique identifier of a file to use as the insight's cover image.
+              required:
+              - title
+              - url
+      responses:
+        '201':
+          description: '201'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                        description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                      title:
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                        - insight
+                      fields:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            label:
+                              type: string
+                              description: The field's label (name). Must match an existing field label when updating, or will create a new field when creating.
+                            value:
+                              oneOf:
+                              - type: string
+                              - type: boolean
+                              - type: number
+                              - type: array
+                                items:
+                                  type: string
+                              description: 'The field''s value. Type depends on the field type: string for TEXT/EMAIL/URL/PHONE, boolean for BOOLEAN, number for NUMBER/NPS, string (ISO 8601) for DATETIME, string array for SELECT, or string (contact name) for PERSON. Null to clear the value.'
+                            type:
+                              type: string
+                              enum:
+                              - BOOLEAN
+                              - DATETIME
+                              - EMAIL
+                              - NPS
+                              - NUMBER
+                              - PERSON
+                              - PHONE
+                              - SELECT
+                              - TEXT
+                              - URL
+                              description: Include the desired type when creating a new field. If omitted or left empty, the field type defaults to TEXT. Do not include this property when referencing an existing field.
+                          required:
+                          - label
+                          - value
+                      created_at:
+                        type: string
+                      deleted:
+                        type: boolean
+                      project:
+                        type: object
+                        properties:
+                          id:
+                            type:
+                            - string
+                            - 'null'
+                        required:
+                        - id
+                      folder:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                        required:
+                        - id
+                      files:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Unique identifier of the file.
+                            name:
+                              type: string
+                              description: The file's original name.
+                            type:
+                              type:
+                              - string
+                              - 'null'
+                              description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                            size:
+                              type:
+                              - number
+                              - 'null'
+                              description: Size of the file in bytes. Null if unknown.
+                            status:
+                              type: string
+                              enum:
+                              - completed
+                              - pending
+                              - failed
+                              description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                            author:
+                              oneOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  name:
+                                    type: string
+                                required:
+                                - id
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: The user who uploaded the file, or null if the author is unknown.
+                            created_at:
+                              oneOf:
+                              - type: string
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: ISO 8601 timestamp when the file was created.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Permanent URL pointing at the **Download a file** endpoint. Safe to cache and store — the URL itself never expires, but calling it requires the same authentication as other API endpoints and returns a short-lived presigned URL each time. The endpoint performs its own readiness and access checks.
+                          required:
+                          - id
+                          - name
+                          - type
+                          - size
+                          - status
+                          - author
+                          - created_at
+                          - url
+                      cover_image:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            description: Unique identifier of the file.
+                          name:
+                            type: string
+                            description: The file's original name.
+                          type:
+                            type:
+                            - string
+                            - 'null'
+                            description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                          size:
+                            type:
+                            - number
+                            - 'null'
+                            description: Size of the file in bytes. Null if unknown.
+                          status:
+                            type: string
+                            enum:
+                            - completed
+                            - pending
+                            - failed
+                            description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                          author:
+                            oneOf:
+                            - type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                              - id
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: The user who uploaded the file, or null if the author is unknown.
+                          created_at:
+                            oneOf:
+                            - type: string
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: ISO 8601 timestamp when the file was created.
+                          url:
+                            type:
+                            - string
+                            - 'null'
+                            description: URL to download the cover image. Only available when the file has been fully processed.
+                        required:
+                        - id
+                        - name
+                        - type
+                        - size
+                        - status
+                        - author
+                        - created_at
+                        - url
+                    required:
+                    - id
+                    - title
+                    - type
+                    - fields
+                    - created_at
+                    - deleted
+                    - project
+                    - folder
+                    - files
+                    - cover_image
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - InvalidOperation
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - ValidationError
+                          title:
+                            type: string
+                            enum:
+                            - Contract violation
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                        - message
+                        - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: postV1InsightsImportFile
+      x-operation-id-source: derived
+  /v1/insights/user/{user_id}:
+    get:
+      description: 'Retrieve all insights owned by a specific user. Returns insights that were created by or assigned to the specified user.
+
+
+        **Note:** This endpoint is deprecated. Insights are no longer owned by individual users — they belong to the workspace. Use **List docs** (`GET /v1/docs`) instead.
+
+
+        Results support the same filtering, sorting, and pagination as the **List insights** endpoint.'
+      summary: List personal insights
+      deprecated: true
+      tags:
+      - Insights
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: See [Pagination](https://developers.dovetail.com/docs/pagination) for details about how to use a cursor to iterate through the list.
+        style: deepObject
+        schema:
+          default:
+            limit: 100
+          type: object
+          properties:
+            start_cursor:
+              type: string
+            limit:
+              default: 100
+              type:
+              - integer
+              - 'null'
+              minimum: 0
+              maximum: 100
+      - name: filter
+        in: query
+        description: See [Filters](https://developers.dovetail.com/docs/filters) for details on parameter formatting.
+        style: deepObject
+        schema:
+          type: object
+          properties:
+            created_at:
+              type: object
+              properties:
+                gt:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: Great than operator
+                gte:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: Great than or equal to operator
+                lt:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: Less than operator
+                lte:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: Less than or equal operator
+              description: Filter results based on dates. When passing in operators, the operator pairs are mutually exclusive. For example, you cannot send both `gt` and `gte` in the same request.
+            folder_id:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+              description: Unique identifier(s) of the associated folder(s)
+            project_id:
+              oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+              description: Unique identifier(s) of the associated project(s)
+            title:
+              type: object
+              properties:
+                contains:
+                  type: string
+                  description: Substring (case-insensitive) to search for within the target string
+                equal_to:
+                  type: string
+                  description: Equal to operator
+              description: Filter results based on string value. You can either provide a `contains` operator for substring matching or an `equal_to` operator for exact matching. These options are mutually exclusive.
+          additionalProperties: false
+      - name: sort
+        in: query
+        description: See [Sort](https://developers.dovetail.com/docs/sort) for details on the sort parameter.
+        schema:
+          default: created_at:desc
+          oneOf:
+          - type: string
+            enum:
+            - created_at:asc
+            - created_at:desc
+            - title:asc
+            - title:desc
+          - type: array
+            items:
+              type: string
+              enum:
+              - created_at:asc
+              - created_at:desc
+              - title:asc
+              - title:desc
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        url:
+                          type: string
+                          description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                        title:
+                          type: string
+                        type:
+                          type: string
+                          enum:
+                          - insight
+                        created_at:
+                          type: string
+                        folder:
+                          type:
+                          - object
+                          - 'null'
+                          properties:
+                            id:
+                              type: string
+                          required:
+                          - id
+                      required:
+                      - id
+                      - title
+                      - type
+                      - created_at
+                      - folder
+                  page:
+                    type: object
+                    properties:
+                      total_count:
+                        type: number
+                        description: Total number of items matching the query.
+                      has_more:
+                        type: boolean
+                        description: Whether there are more items beyond the current page.
+                      next_cursor:
+                        type:
+                        - string
+                        - 'null'
+                        description: Cursor to pass as `page[start_cursor]` to fetch the next page. Null when there are no more results.
+                    required:
+                    - total_count
+                    - has_more
+                    - next_cursor
+                required:
+                - data
+                - page
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - ValidationError
+                        title:
+                          type: string
+                          enum:
+                          - Contract violation
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                      - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: getV1InsightsUserByUserId
+      x-operation-id-source: derived
+  /v1/insights/{insight_id}:
+    get:
+      description: 'Retrieve a single insight by its unique identifier. Returns the insight''s full metadata including title, custom fields, associated project, folder, files, and cover image.
+
+
+        **Note:** This endpoint is deprecated. Use **Get doc** (`GET /v1/docs/:doc_id`) instead.
+
+
+        To retrieve the actual content body, use the **Export insight** endpoint.
+
+
+        > 🚧 Permissions
+
+        >
+
+        > Please check you have the relevant permissions required to access this resource. This may include specific permissions on the object itself or its parent, or having the correct user role if you''re making updates.'
+      summary: Get insight
+      deprecated: true
+      tags:
+      - Insights
+      parameters:
+      - name: insight_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the insight.
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                        description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                      title:
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                        - insight
+                      fields:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            label:
+                              type: string
+                              description: The field's label (name). Must match an existing field label when updating, or will create a new field when creating.
+                            value:
+                              oneOf:
+                              - type: string
+                              - type: boolean
+                              - type: number
+                              - type: array
+                                items:
+                                  type: string
+                              description: 'The field''s value. Type depends on the field type: string for TEXT/EMAIL/URL/PHONE, boolean for BOOLEAN, number for NUMBER/NPS, string (ISO 8601) for DATETIME, string array for SELECT, or string (contact name) for PERSON. Null to clear the value.'
+                            type:
+                              type: string
+                              enum:
+                              - BOOLEAN
+                              - DATETIME
+                              - EMAIL
+                              - NPS
+                              - NUMBER
+                              - PERSON
+                              - PHONE
+                              - SELECT
+                              - TEXT
+                              - URL
+                              description: Include the desired type when creating a new field. If omitted or left empty, the field type defaults to TEXT. Do not include this property when referencing an existing field.
+                          required:
+                          - label
+                          - value
+                      created_at:
+                        type: string
+                      deleted:
+                        type: boolean
+                      project:
+                        type: object
+                        properties:
+                          id:
+                            type:
+                            - string
+                            - 'null'
+                        required:
+                        - id
+                      folder:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                        required:
+                        - id
+                      files:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Unique identifier of the file.
+                            name:
+                              type: string
+                              description: The file's original name.
+                            type:
+                              type:
+                              - string
+                              - 'null'
+                              description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                            size:
+                              type:
+                              - number
+                              - 'null'
+                              description: Size of the file in bytes. Null if unknown.
+                            status:
+                              type: string
+                              enum:
+                              - completed
+                              - pending
+                              - failed
+                              description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                            author:
+                              oneOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  name:
+                                    type: string
+                                required:
+                                - id
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: The user who uploaded the file, or null if the author is unknown.
+                            created_at:
+                              oneOf:
+                              - type: string
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: ISO 8601 timestamp when the file was created.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Permanent URL pointing at the **Download a file** endpoint. Safe to cache and store — the URL itself never expires, but calling it requires the same authentication as other API endpoints and returns a short-lived presigned URL each time. The endpoint performs its own readiness and access checks.
+                          required:
+                          - id
+                          - name
+                          - type
+                          - size
+                          - status
+                          - author
+                          - created_at
+                          - url
+                      cover_image:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            description: Unique identifier of the file.
+                          name:
+                            type: string
+                            description: The file's original name.
+                          type:
+                            type:
+                            - string
+                            - 'null'
+                            description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                          size:
+                            type:
+                            - number
+                            - 'null'
+                            description: Size of the file in bytes. Null if unknown.
+                          status:
+                            type: string
+                            enum:
+                            - completed
+                            - pending
+                            - failed
+                            description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                          author:
+                            oneOf:
+                            - type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                              - id
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: The user who uploaded the file, or null if the author is unknown.
+                          created_at:
+                            oneOf:
+                            - type: string
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: ISO 8601 timestamp when the file was created.
+                          url:
+                            type:
+                            - string
+                            - 'null'
+                            description: URL to download the cover image. Only available when the file has been fully processed.
+                        required:
+                        - id
+                        - name
+                        - type
+                        - size
+                        - status
+                        - author
+                        - created_at
+                        - url
+                    required:
+                    - id
+                    - title
+                    - type
+                    - fields
+                    - created_at
+                    - deleted
+                    - project
+                    - folder
+                    - files
+                    - cover_image
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - ValidationError
+                        title:
+                          type: string
+                          enum:
+                          - Contract violation
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                      - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: getV1InsightsByInsightId
+      x-operation-id-source: derived
+    delete:
+      description: 'Delete an insight. The insight is soft-deleted and moved to the project''s trash.
+
+
+        **Note:** This endpoint is deprecated. Use **Delete doc** (`DELETE /v1/docs/:doc_id`) instead.
+
+
+        Deleted insights can be restored for up to 30 days before they are automatically and permanently deleted.
+
+
+        Returns the deleted insight object.
+
+
+        > 🚧 Permissions
+
+        >
+
+        > Please check you have the relevant permissions required to access this resource. This may include specific permissions on the object itself or its parent, or having the correct user role if you''re making updates.'
+      summary: Delete insight
+      deprecated: true
+      tags:
+      - Insights
+      parameters:
+      - name: insight_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Insight ID
+        description: Unique identifier of the insight.
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                        description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                      title:
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                        - insight
+                      fields:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            label:
+                              type: string
+                              description: The field's label (name). Must match an existing field label when updating, or will create a new field when creating.
+                            value:
+                              oneOf:
+                              - type: string
+                              - type: boolean
+                              - type: number
+                              - type: array
+                                items:
+                                  type: string
+                              description: 'The field''s value. Type depends on the field type: string for TEXT/EMAIL/URL/PHONE, boolean for BOOLEAN, number for NUMBER/NPS, string (ISO 8601) for DATETIME, string array for SELECT, or string (contact name) for PERSON. Null to clear the value.'
+                            type:
+                              type: string
+                              enum:
+                              - BOOLEAN
+                              - DATETIME
+                              - EMAIL
+                              - NPS
+                              - NUMBER
+                              - PERSON
+                              - PHONE
+                              - SELECT
+                              - TEXT
+                              - URL
+                              description: Include the desired type when creating a new field. If omitted or left empty, the field type defaults to TEXT. Do not include this property when referencing an existing field.
+                          required:
+                          - label
+                          - value
+                      created_at:
+                        type: string
+                      deleted:
+                        type: boolean
+                      project:
+                        type: object
+                        properties:
+                          id:
+                            type:
+                            - string
+                            - 'null'
+                        required:
+                        - id
+                      folder:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                        required:
+                        - id
+                      files:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Unique identifier of the file.
+                            name:
+                              type: string
+                              description: The file's original name.
+                            type:
+                              type:
+                              - string
+                              - 'null'
+                              description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                            size:
+                              type:
+                              - number
+                              - 'null'
+                              description: Size of the file in bytes. Null if unknown.
+                            status:
+                              type: string
+                              enum:
+                              - completed
+                              - pending
+                              - failed
+                              description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                            author:
+                              oneOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  name:
+                                    type: string
+                                required:
+                                - id
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: The user who uploaded the file, or null if the author is unknown.
+                            created_at:
+                              oneOf:
+                              - type: string
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: ISO 8601 timestamp when the file was created.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Permanent URL pointing at the **Download a file** endpoint. Safe to cache and store — the URL itself never expires, but calling it requires the same authentication as other API endpoints and returns a short-lived presigned URL each time. The endpoint performs its own readiness and access checks.
+                          required:
+                          - id
+                          - name
+                          - type
+                          - size
+                          - status
+                          - author
+                          - created_at
+                          - url
+                      cover_image:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            description: Unique identifier of the file.
+                          name:
+                            type: string
+                            description: The file's original name.
+                          type:
+                            type:
+                            - string
+                            - 'null'
+                            description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                          size:
+                            type:
+                            - number
+                            - 'null'
+                            description: Size of the file in bytes. Null if unknown.
+                          status:
+                            type: string
+                            enum:
+                            - completed
+                            - pending
+                            - failed
+                            description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                          author:
+                            oneOf:
+                            - type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                              - id
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: The user who uploaded the file, or null if the author is unknown.
+                          created_at:
+                            oneOf:
+                            - type: string
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: ISO 8601 timestamp when the file was created.
+                          url:
+                            type:
+                            - string
+                            - 'null'
+                            description: URL to download the cover image. Only available when the file has been fully processed.
+                        required:
+                        - id
+                        - name
+                        - type
+                        - size
+                        - status
+                        - author
+                        - created_at
+                        - url
+                    required:
+                    - id
+                    - title
+                    - type
+                    - fields
+                    - created_at
+                    - deleted
+                    - project
+                    - folder
+                    - files
+                    - cover_image
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - ValidationError
+                        title:
+                          type: string
+                          enum:
+                          - Contract violation
+                        message:
+                          type: string
+                        path:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                      - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: deleteV1InsightsByInsightId
+      x-operation-id-source: derived
+    patch:
+      description: 'Update an insight''s properties. Supports updating the title, custom fields, cover image, and folder location. Only the fields you include in the request body will be modified — omitted fields are left unchanged.
+
+
+        **Note:** This endpoint is deprecated. Use **Patch doc** (`PATCH /v1/docs/:doc_id`) instead.
+
+
+        **Note:** `folder_id` and `fields` cannot be updated in the same request.
+
+
+        Returns the updated insight object.
+
+
+        > 🚧 Permissions
+
+        >
+
+        > Please check you have the relevant permissions required to access this resource. This may include specific permissions on the object itself or its parent, or having the correct user role if you''re making updates.'
+      summary: Patch insight
+      deprecated: true
+      tags:
+      - Insights
+      parameters:
+      - name: insight_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the insight.
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                  description: The insight's title.
+                  example: My First Insight
+                fields:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                        description: The field's label (name). Must match an existing field label when updating, or will create a new field when creating.
+                      value:
+                        oneOf:
+                        - type: string
+                        - type: boolean
+                        - type: number
+                        - type: array
+                          items:
+                            type: string
+                        description: 'The field''s value. Type depends on the field type: string for TEXT/EMAIL/URL/PHONE, boolean for BOOLEAN, number for NUMBER/NPS, string (ISO 8601) for DATETIME, string array for SELECT, or string (contact name) for PERSON. Null to clear the value.'
+                      type:
+                        type: string
+                        enum:
+                        - BOOLEAN
+                        - DATETIME
+                        - EMAIL
+                        - NPS
+                        - NUMBER
+                        - PERSON
+                        - PHONE
+                        - SELECT
+                        - TEXT
+                        - URL
+                        description: Include the desired type when creating a new field. If omitted or left empty, the field type defaults to TEXT. Do not include this property when referencing an existing field.
+                    required:
+                    - label
+                    - value
+                  description: The insight's fields.
+                cover_image_file_id:
+                  type:
+                  - string
+                  - 'null'
+                  description: Unique identifier of a file to use as the insight's cover image. Set to null to remove the cover image.
+                folder_id:
+                  type:
+                  - string
+                  - 'null'
+                  description: Set the folder for this insight, or null to move it out of a folder. Cannot be combined with fields in the same request.
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                        description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                      title:
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                        - insight
+                      fields:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            label:
+                              type: string
+                              description: The field's label (name). Must match an existing field label when updating, or will create a new field when creating.
+                            value:
+                              oneOf:
+                              - type: string
+                              - type: boolean
+                              - type: number
+                              - type: array
+                                items:
+                                  type: string
+                              description: 'The field''s value. Type depends on the field type: string for TEXT/EMAIL/URL/PHONE, boolean for BOOLEAN, number for NUMBER/NPS, string (ISO 8601) for DATETIME, string array for SELECT, or string (contact name) for PERSON. Null to clear the value.'
+                            type:
+                              type: string
+                              enum:
+                              - BOOLEAN
+                              - DATETIME
+                              - EMAIL
+                              - NPS
+                              - NUMBER
+                              - PERSON
+                              - PHONE
+                              - SELECT
+                              - TEXT
+                              - URL
+                              description: Include the desired type when creating a new field. If omitted or left empty, the field type defaults to TEXT. Do not include this property when referencing an existing field.
+                          required:
+                          - label
+                          - value
+                      created_at:
+                        type: string
+                      deleted:
+                        type: boolean
+                      project:
+                        type: object
+                        properties:
+                          id:
+                            type:
+                            - string
+                            - 'null'
+                        required:
+                        - id
+                      folder:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                        required:
+                        - id
+                      files:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Unique identifier of the file.
+                            name:
+                              type: string
+                              description: The file's original name.
+                            type:
+                              type:
+                              - string
+                              - 'null'
+                              description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                            size:
+                              type:
+                              - number
+                              - 'null'
+                              description: Size of the file in bytes. Null if unknown.
+                            status:
+                              type: string
+                              enum:
+                              - completed
+                              - pending
+                              - failed
+                              description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                            author:
+                              oneOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  name:
+                                    type: string
+                                required:
+                                - id
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: The user who uploaded the file, or null if the author is unknown.
+                            created_at:
+                              oneOf:
+                              - type: string
+                              - type:
+                                - string
+                                - 'null'
+                                format: 'null'
+                              description: ISO 8601 timestamp when the file was created.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Permanent URL pointing at the **Download a file** endpoint. Safe to cache and store — the URL itself never expires, but calling it requires the same authentication as other API endpoints and returns a short-lived presigned URL each time. The endpoint performs its own readiness and access checks.
+                          required:
+                          - id
+                          - name
+                          - type
+                          - size
+                          - status
+                          - author
+                          - created_at
+                          - url
+                      cover_image:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            description: Unique identifier of the file.
+                          name:
+                            type: string
+                            description: The file's original name.
+                          type:
+                            type:
+                            - string
+                            - 'null'
+                            description: The file's MIME type (e.g. 'image/png', 'video/mp4'). Null if unknown.
+                          size:
+                            type:
+                            - number
+                            - 'null'
+                            description: Size of the file in bytes. Null if unknown.
+                          status:
+                            type: string
+                            enum:
+                            - completed
+                            - pending
+                            - failed
+                            description: Processing status of the file. 'pending' while being processed, 'completed' when ready, or 'failed' if processing encountered an error.
+                          author:
+                            oneOf:
+                            - type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                              - id
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: The user who uploaded the file, or null if the author is unknown.
+                          created_at:
+                            oneOf:
+                            - type: string
+                            - type:
+                              - string
+                              - 'null'
+                              format: 'null'
+                            description: ISO 8601 timestamp when the file was created.
+                          url:
+                            type:
+                            - string
+                            - 'null'
+                            description: URL to download the cover image. Only available when the file has been fully processed.
+                        required:
+                        - id
+                        - name
+                        - type
+                        - size
+                        - status
+                        - author
+                        - created_at
+                        - url
+                    required:
+                    - id
+                    - title
+                    - type
+                    - fields
+                    - created_at
+                    - deleted
+                    - project
+                    - folder
+                    - files
+                    - cover_image
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - InvalidOperation
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - ValidationError
+                          title:
+                            type: string
+                            enum:
+                            - Contract violation
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                        - message
+                        - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: patchV1InsightsByInsightId
+      x-operation-id-source: derived
+  /v1/insights/{insight_id}/export/{type}:
+    get:
+      description: 'Export the content body of an insight in either HTML or Markdown format. Use the `type` path parameter to specify the desired format: `html` or `markdown`.
+
+
+        **Note:** This endpoint is deprecated. Use **Export doc** (`GET /v1/docs/:doc_id/export/:type`) instead.
+
+
+        This is the only way to retrieve the actual text content of an insight via the API. The **Get insight** endpoint returns metadata only.
+
+
+        Returns the insight object with an additional `content_html` or `content_markdown` field containing the full content.'
+      summary: Export insight
+      deprecated: true
+      tags:
+      - Insights
+      parameters:
+      - name: insight_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the insight.
+      - name: type
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - html
+          - markdown
+      responses:
+        '200':
+          description: '200'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    allOf:
+                    - type: object
+                      properties:
+                        id:
+                          type: string
+                        url:
+                          type: string
+                          description: The URL of this resource in the Dovetail web app. This field is experimental and may change without notice.
+                        type:
+                          type: string
+                          enum:
+                          - insight
+                        title:
+                          type: string
+                        created_at:
+                          type: string
+                        deleted:
+                          type: boolean
+                      required:
+                      - id
+                      - type
+                      - title
+                      - created_at
+                      - deleted
+                    - oneOf:
+                      - type: object
+                        properties:
+                          content_html:
+                            type: string
+                        required:
+                        - content_html
+                      - type: object
+                        properties:
+                          content_markdown:
+                            type: string
+                        required:
+                        - content_markdown
+                required:
+                - data
+        '400':
+          description: '400'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - InvalidOperation
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - ValidationError
+                          title:
+                            type: string
+                            enum:
+                            - Contract violation
+                          message:
+                            type: string
+                          path:
+                            type: string
+                        required:
+                        - code
+                        - title
+                        - message
+                        - path
+                required:
+                - errors
+        '401':
+          description: '401'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - Unauthorized
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '403':
+          description: '403'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - Forbidden
+                          title:
+                            type: string
+                          message:
+                            type: string
+                        required:
+                        - code
+                        - title
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                            - IpNotAllowlisted
+                          title:
+                            type: string
+                          message:
+                            type: string
+                          decisionId:
+                            type: string
+                            description: Correlation id quoting this enforcement decision — include it when contacting support.
+                        required:
+                        - code
+                        - title
+                        - decisionId
+                required:
+                - errors
+        '404':
+          description: '404'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - NotFound
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '422':
+          description: '422'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - UnprocessableContent
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                      - message
+                required:
+                - errors
+        '429':
+          description: '429'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - TooManyRequests
+                        title:
+                          type: string
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+        '500':
+          description: '500'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          enum:
+                          - InternalError
+                        title:
+                          type: string
+                          enum:
+                          - Internal server error
+                        message:
+                          type: string
+                      required:
+                      - code
+                      - title
+                required:
+                - errors
+      operationId: getV1InsightsByInsightIdExportByType
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+x-provenance:
+  method: searched
+  source: https://developers.dovetail.com/reference
+  harvested: '2026-10-14'
+  tool: harvest-readme-openapi.py
+  note: Assembled verbatim from the OpenAPI definition ReadMe embeds in each operation page of the provider's developer portal; paths and components merged by API title, nothing authored.
+  assembled_from:
+  - https://developers.dovetail.com/reference/delete_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/delete_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/delete_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/delete_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/delete_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/delete_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/delete_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-docs-doc-id.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/delete_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-data.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id-themes.md
+  - https://developers.dovetail.com/reference/get_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels-data-datum-id.md
+  - https://developers.dovetail.com/reference/get_v1-channels.md
+  - https://developers.dovetail.com/reference/get_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/get_v1-contacts.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/get_v1-data.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-docs.md
+  - https://developers.dovetail.com/reference/get_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/get_v1-fields.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id-download.md
+  - https://developers.dovetail.com/reference/get_v1-files-file-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id-contents.md
+  - https://developers.dovetail.com/reference/get_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/get_v1-folders.md
+  - https://developers.dovetail.com/reference/get_v1-highlights-highlight-id.md
+  - https://developers.dovetail.com/reference/get_v1-highlights.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights-user-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-insights.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id-export-type.md
+  - https://developers.dovetail.com/reference/get_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/get_v1-notes.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id-context.md
+  - https://developers.dovetail.com/reference/get_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/get_v1-projects-templates.md
+  - https://developers.dovetail.com/reference/get_v1-projects.md
+  - https://developers.dovetail.com/reference/get_v1-tags-boards.md
+  - https://developers.dovetail.com/reference/get_v1-tags-tag-id.md
+  - https://developers.dovetail.com/reference/get_v1-tags.md
+  - https://developers.dovetail.com/reference/get_v1-token-info.md
+  - https://developers.dovetail.com/reference/get_v1-users-user-id.md
+  - https://developers.dovetail.com/reference/get_v1-users.md
+  - https://developers.dovetail.com/reference/get_v1-workspace-context.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-channel-id.md
+  - https://developers.dovetail.com/reference/patch_v1-channels-topic-topic-id.md
+  - https://developers.dovetail.com/reference/patch_v1-contacts-contact-id.md
+  - https://developers.dovetail.com/reference/patch_v1-data-data-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-docs-doc-id.md
+  - https://developers.dovetail.com/reference/patch_v1-fields-field-id.md
+  - https://developers.dovetail.com/reference/patch_v1-folders-folder-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id-comments-comment-id.md
+  - https://developers.dovetail.com/reference/patch_v1-insights-insight-id.md
+  - https://developers.dovetail.com/reference/patch_v1-notes-note-id.md
+  - https://developers.dovetail.com/reference/patch_v1-projects-project-id.md
+  - https://developers.dovetail.com/reference/post_v1-channels-data.md
+  - https://developers.dovetail.com/reference/post_v1-channels-topic.md
+  - https://developers.dovetail.com/reference/post_v1-channels.md
+  - https://developers.dovetail.com/reference/post_v1-contacts.md
+  - https://developers.dovetail.com/reference/post_v1-data-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-data.md
+  - https://developers.dovetail.com/reference/post_v1-dataset-dataset-id-data.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-docs-doc-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-docs-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-docs.md
+  - https://developers.dovetail.com/reference/post_v1-fields.md
+  - https://developers.dovetail.com/reference/post_v1-files.md
+  - https://developers.dovetail.com/reference/post_v1-folders.md
+  - https://developers.dovetail.com/reference/post_v1-highlights-highlight-id-tags.md
+  - https://developers.dovetail.com/reference/post_v1-highlights.md
+  - https://developers.dovetail.com/reference/post_v1-insights-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-resolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments-unresolve.md
+  - https://developers.dovetail.com/reference/post_v1-insights-insight-id-comments.md
+  - https://developers.dovetail.com/reference/post_v1-insights.md
+  - https://developers.dovetail.com/reference/post_v1-notes-import-file.md
+  - https://developers.dovetail.com/reference/post_v1-notes.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-docs.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-context-keywords.md
+  - https://developers.dovetail.com/reference/post_v1-projects-project-id-workspace-field-groups.md
+  - https://developers.dovetail.com/reference/post_v1-projects.md
+  - https://developers.dovetail.com/reference/post_v1-search.md
+  - https://developers.dovetail.com/reference/post_v1-summarize.md
+  - https://developers.dovetail.com/reference/post_v1-tags.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-audio.md
+  - https://developers.dovetail.com/reference/post_v1-transcripts-data-id-utterance.md
+  - https://developers.dovetail.com/reference/post_v1-workspace-context-docs.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-large-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-file-id-upload-complete.md
+  - https://developers.dovetail.com/reference/post_v2-files-large-upload.md
+  - https://developers.dovetail.com/reference/post_v2-files-upload.md
+  - https://developers.dovetail.com/reference/post_v2-search.md
+  - https://developers.dovetail.com/reference/put_v1-transcripts-data-id.md
+  merge:
+    pages: 111
+    deduped: 110
+    conflicts_kept_first: 0
